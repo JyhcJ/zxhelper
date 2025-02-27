@@ -44,7 +44,7 @@ END_MESSAGE_MAP()
 
 BOOL Viewer::OnInitDialog() {
 	CDialogEx::OnInitDialog();  // 调用基类的 OnInitDialog
-	 // 在控件初始化后调用 init
+	// 在控件初始化后调用 init
 	init();
 	return TRUE;  // 返回 TRUE，除非你将焦点设置到某个控件
 }
@@ -63,11 +63,9 @@ void Viewer::OnBnClickedButton1()
 void Viewer::init() {
 	CString str;
 	float percentage;
-	MessageBox(L"1", NULL, 0U);
 	show_name.SetWindowTextW(getName());
 
-	/*str.Format(_T("%d"), (DWORD)getAtt_qixue());
-	MessageBox(str, NULL, 0U);
+	str.Format(_T("%d"), (QWORD)getAtt_qixue());
 	show_qixue.SetWindowTextW(str);
 
 	str.Format(_T("%d"), getAtt_zhenqi());
@@ -84,5 +82,5 @@ void Viewer::init() {
 	percentage = getAtt_jianmian() / 10.0;
 	str.Format(_T("%.1f"), percentage);
 	str.Append(_T("%"));
-	show_jianmian.SetWindowTextW(str);*/
+	show_jianmian.SetWindowTextW(str);
 }

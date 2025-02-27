@@ -221,7 +221,7 @@ void CDLL注入器Dlg::injectP1(HWND handle) {
 	show_edit.GetWindowTextW(rString);
 	if (rString.IsEmpty())
 	{
-		dll_inject(process, "C:\\Users\\54469\\Desktop\\zxhelper\\zxhelper\\x64\\Release\\zxhelper.dll");
+		dll_inject(process, "C:/Users/54469/Desktop/zxhelper/zxhelper/x64/Debug/zxhelper.dll");
 	}
 	else {
 		dll_inject(process, (const char*)rString.GetString());
