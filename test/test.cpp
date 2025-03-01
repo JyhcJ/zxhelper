@@ -2,6 +2,7 @@
 //
 
 #include <iostream>
+#pragma comment(lib,"zxhelper.lib")
 
 int main()
 {

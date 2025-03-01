@@ -30,6 +30,15 @@
     <ClCompile Include="controller.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="normalFun.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="T_obj.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Log.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="zxhelper.def">
@@ -62,6 +71,15 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="controller.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="normalFun.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="T_obj.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Log.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

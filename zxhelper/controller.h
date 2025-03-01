@@ -1,9 +1,10 @@
 #pragma once
-class Call
-{
-};
 
 void relex();
+
+void traversePackage();
+
+void seekCityRoll();
 
 wchar_t* getName();
 

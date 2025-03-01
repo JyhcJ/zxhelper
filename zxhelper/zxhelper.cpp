@@ -3,11 +3,13 @@
 
 #include "pch.h"
 #include "framework.h"
-#include "zxhelper.h"
 #include "Viewer.h"
+#include "zxhelper.h"
+#include "Log.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
 
 //
 //TODO:  如果此 DLL 相对于 MFC DLL 是动态链接的，
@@ -61,11 +63,34 @@ DWORD WINAPI showDialog(LPARAM LPDATE) {
 	return TRUE;
 
 }
-// CzxhelperApp 初始化
+// 全局日志对象
+CLog g_Log;
+
+// 初始化日志
+BOOL InitLog() {
+	CString strLogPath = _T("C:\\MyAppLog.txt"); // 日志文件路径
+	return g_Log.Init(strLogPath);
+}
+// 关闭日志
+void CloseLog() {
+	g_Log.Close();
+}
+ //CzxhelperApp 初始化
 
 BOOL CzxhelperApp::InitInstance()
 {
 	CWinApp::InitInstance();
+	// 初始化日志
+	if (!InitLog()) {
+		AfxMessageBox(_T("Failed to initialize log!"));
+	}
+	g_Log.Write(_T("Application started."));
+	// 其他初始化代码...
 	::CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)showDialog, NULL, NULL, NULL);
 	return TRUE;
+}
+int CzxhelperApp::ExitInstance() {
+	g_Log.Write(_T("Application exited."));
+	CloseLog(); // 关闭日志
+	return CWinApp::ExitInstance();
 }

@@ -1,11 +1,8 @@
-﻿// C_viewer.cpp: 实现文件
-//
-
-#include "pch.h"
-#include "zxhelper.h"
+﻿#include "pch.h"
 #include "afxdialogex.h"
-#include "Viewer.h"
 #include "controller.h"
+#include "Viewer.h"
+#include "zxhelper.h"
 
 
 // C_viewer 对话框
@@ -30,8 +27,6 @@ void Viewer::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_STATIC10_yuanli, show_yuanli);
 	DDX_Control(pDX, IDC_STATIC_wushi, show_wushi);
 	DDX_Control(pDX, IDC_STATIC_jianmian, show_jianmian);
-
-
 }
 
 
@@ -56,22 +51,23 @@ void Viewer::OnBnClickedButton1()
 	relex();
 
 
-
 }
 
 
 void Viewer::init() {
+	
 	CString str;
-	float percentage;
+
+	double percentage;
 	show_name.SetWindowTextW(getName());
 
-	str.Format(_T("%d"), (QWORD)getAtt_qixue());
+	str.Format(_T("%d"), (int)getAtt_qixue());
 	show_qixue.SetWindowTextW(str);
 
-	str.Format(_T("%d"), getAtt_zhenqi());
+	str.Format(_T("%d"), (int)getAtt_zhenqi());
 	show_zhenqi.SetWindowTextW(str);
 
-	str.Format(_T("%d"), getAtt_yuanli());
+	str.Format(_T("%d"), (int)getAtt_yuanli());
 	show_yuanli.SetWindowTextW(str);
 
 	percentage = getAtt_wushi() / 10.0;

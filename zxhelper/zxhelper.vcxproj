@@ -185,6 +185,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="controller.cpp" />
+    <ClCompile Include="Log.cpp" />
+    <ClCompile Include="normalFun.cpp" />
+    <ClCompile Include="T_obj.cpp" />
     <ClCompile Include="Viewer.cpp" />
     <ClCompile Include="Hook.cpp" />
     <ClCompile Include="pch.cpp">
@@ -205,6 +208,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="controller.h" />
+    <ClInclude Include="Log.h" />
+    <ClInclude Include="normalFun.h" />
+    <ClInclude Include="T_obj.h" />
     <ClInclude Include="Viewer.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Hook.h" />
