@@ -39,6 +39,9 @@
     <ClCompile Include="Log.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Viewer_packet.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="zxhelper.def">
@@ -80,6 +83,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Log.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Viewer_packet.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

@@ -28,4 +28,19 @@ label_exit:
     pop rbx
     ret
 call_relex endp
+
+call_useObj proc
+    sub rsp, 38h
+    ;mov rcx,0xBFF0510h
+    ;mov rdx,0h
+    ;mov r8,0x6h
+    ;mov r9,0x5d3dh
+    mov al,1h
+    mov [rsp + 20h], al
+    mov rax, 1409a9c70h
+    call rax
+    add rsp, 38h
+    ret
+call_useObj endp
+
 end

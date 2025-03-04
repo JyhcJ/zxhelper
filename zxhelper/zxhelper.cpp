@@ -5,11 +5,10 @@
 #include "framework.h"
 #include "Viewer.h"
 #include "zxhelper.h"
-#include "Log.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
 
 //
 //TODO:  如果此 DLL 相对于 MFC DLL 是动态链接的，
@@ -17,7 +16,7 @@
 //		MFC 的函数必须将 AFX_MANAGE_STATE 宏添加到
 //		该函数的最前面。
 //
-//		例如: 
+//		例如:
 //
 //		extern "C" BOOL PASCAL EXPORT ExportedFunction()
 //		{
@@ -41,7 +40,6 @@
 BEGIN_MESSAGE_MAP(CzxhelperApp, CWinApp)
 END_MESSAGE_MAP()
 
-
 // CzxhelperApp 构造
 
 CzxhelperApp::CzxhelperApp()
@@ -49,7 +47,6 @@ CzxhelperApp::CzxhelperApp()
 	// TODO:  在此处添加构造代码，
 	// 将所有重要的初始化放置在 InitInstance 中
 }
-
 
 // 唯一的 CzxhelperApp 对象
 
@@ -61,36 +58,15 @@ DWORD WINAPI showDialog(LPARAM LPDATE) {
 	delete c_viewer;
 	FreeLibraryAndExitThread(theApp.m_hInstance, 1);
 	return TRUE;
+}
 
-}
-// 全局日志对象
-CLog g_Log;
-
-// 初始化日志
-BOOL InitLog() {
-	CString strLogPath = _T("C:\\MyAppLog.txt"); // 日志文件路径
-	return g_Log.Init(strLogPath);
-}
-// 关闭日志
-void CloseLog() {
-	g_Log.Close();
-}
- //CzxhelperApp 初始化
+//CzxhelperApp 初始化
 
 BOOL CzxhelperApp::InitInstance()
 {
 	CWinApp::InitInstance();
-	// 初始化日志
-	if (!InitLog()) {
-		AfxMessageBox(_T("Failed to initialize log!"));
-	}
-	g_Log.Write(_T("Application started."));
+
 	// 其他初始化代码...
 	::CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)showDialog, NULL, NULL, NULL);
 	return TRUE;
-}
-int CzxhelperApp::ExitInstance() {
-	g_Log.Write(_T("Application exited."));
-	CloseLog(); // 关闭日志
-	return CWinApp::ExitInstance();
 }

@@ -13,6 +13,7 @@
 // CzxhelperApp
 // 有关此类实现的信息，请参阅 zxhelper.cpp
 //
+// 全局日志对象
 
 class CzxhelperApp : public CWinApp
 {
@@ -23,7 +24,6 @@ public:
 public:
 	virtual BOOL InitInstance();
 
-	virtual int ExitInstance();
-
 	DECLARE_MESSAGE_MAP()
 };
+

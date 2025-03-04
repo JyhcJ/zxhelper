@@ -1,10 +1,17 @@
 #pragma once
+#include "T_obj.h"
+
 
 void relex();
 
-void traversePackage();
+void useObj(QWORD index, QWORD objId);
+
+
+std::vector<T包裹物品属性> traversePackage();
 
 void seekCityRoll();
+
+T人物属性 getPersonAtt();
 
 wchar_t* getName();
 
@@ -20,4 +27,4 @@ QWORD getAtt_wushi();
 
 QWORD getAtt_jianmian();
 
-bool isString(const char* ptr, size_t maxLength);
+bool isString(QWORD* ptr, size_t maxLength);
