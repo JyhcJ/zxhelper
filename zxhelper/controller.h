@@ -7,6 +7,8 @@ void relex();
 void useObj(QWORD index, QWORD objId);
 
 
+void hanHua(CString ptr);
+
 std::vector<T包裹物品属性> traversePackage();
 
 void seekCityRoll();

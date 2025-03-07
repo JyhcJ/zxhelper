@@ -1,9 +1,8 @@
 ﻿#pragma once
 #include "afxdialogex.h"
-#include "Log.h"
 
 
-// C_viewer 对话框
+
 
 class Viewer : public CDialogEx
 {
@@ -29,11 +28,17 @@ public:
 	CStatic show_qixue;
 	virtual BOOL OnInitDialog();// 重写 OnInitDialog
 	void init();
-	virtual void OnDestroy();
+
 	CStatic show_name;
 	CStatic show_jianmian;
 	CStatic show_yuanli;
 	CStatic show_zhenqi;
 	afx_msg void OnBnClickedButton2();
+	afx_msg void OnBnClickedButton3();
+	
+	void OnStartThread();
 
+	CButton m_btn3;
+	CEdit m_edit1;
+	virtual void PostNcDestroy();
 };

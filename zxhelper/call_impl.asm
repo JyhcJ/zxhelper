@@ -43,4 +43,13 @@ call_useObj proc
     ret
 call_useObj endp
 
+call_hanHua proc
+    sub rsp,20h
+    ;mov rcx,C0C03A0h
+    ;mov r8,1d6f0000h
+    mov r15,1409DBC20h
+    call r15
+    add rsp,20h
+    ret
+call_hanHua endp
 end

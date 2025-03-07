@@ -26,15 +26,15 @@ else:
 
 
 
-# 遍历页面（从第 1 页到第 10 页）
-for page in range(1, 10):
+# 遍历页面（从第 1 页到第 49 页）
+for page in range(1, 50):
     print(f"正在抓取第 {page} 页...")
     url = f"{base_url}?&page={page}"  # 分页 URL
     response = requests.get(url, headers=headers) #读取网页数据
     response.encoding = 'utf-8' #设置网页编码格式
 
     # 解析网页内容
-    soup = BeautifulSoup(response.text, 'html.parser')  #优化网页数据
+    soup = BeautifulSoup(response.text, 'html.parser')  #优化网页数据格式
     articles = soup.find_all('li', class_='bor_bom_none')  # 根据实际网页结构调整选择器
 
     # 如果没有找到稿件，说明已经抓取完所有页面
@@ -73,9 +73,9 @@ for page in range(1, 10):
             doc = Document() #定义doc对象
             doc.add_heading('乡村振兴相关稿件链接:'+url1, level=1)  # doc添加标题
          
-            doc.add_paragraph(f"{text_content}")            # doc添加内容
+            doc.add_paragraph(f"{text_content}")            # doc添加正文内容
          
             output_file = os.path.join(desktop_path, title+".docx") # doc创建文件
-            doc.save(output_file)                           #doc保存数据
+            doc.save(output_file)                           # doc保存数据
 
 print(f"所有链接已保存到: {output_file}")

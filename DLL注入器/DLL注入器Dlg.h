@@ -36,4 +36,5 @@ public:
 	afx_msg void OnBnClickedButton1();
 	CEdit show_edit;
 	void injectP1(HWND handle);
+	afx_msg void OnBnClickedButton2();
 };

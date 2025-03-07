@@ -2,11 +2,14 @@
 #include "controller.h"
 #include "normalFun.h"
 #include "Viewer.h"
+#include "Log.h"
 
 extern "C" void call_relex();
 
 //rdx 暂时固定为 0
 extern "C" void call_useObj(QWORD rcx, QWORD rdx, QWORD r8, QWORD r9);
+
+extern "C" void call_hanHua(QWORD rcx, QWORD rdx = 0, LPCWSTR r8 = nullptr);
 
 extern CLog g_Log;
 
@@ -41,6 +44,17 @@ void useObj(QWORD index, QWORD objId) {
 void goHome() {
 	traversePackage();
 	seekCityRoll();
+}
+
+void hanHua(CString str) {
+	Call_输出调试信息("调试信息:!!!");
+	if (isString((QWORD*)str.GetString(), 12))
+	{
+		//Call_输出调试信息("调试信息:!!!%p", str);
+		QWORD rcx = SafeReadQWORD((QWORD*)(BASE_ADDRESS_ATT));
+		rcx = SafeReadQWORD((QWORD*)(rcx + 0x40));
+		call_hanHua(rcx, NULL, str);
+	}
 }
 
 std::vector<T包裹物品属性> traversePackage() {
