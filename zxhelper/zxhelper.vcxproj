@@ -224,6 +224,9 @@
   <ItemGroup>
     <ResourceCompile Include="zxhelper.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\skillName.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />

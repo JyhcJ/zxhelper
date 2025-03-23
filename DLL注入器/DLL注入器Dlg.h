@@ -37,4 +37,6 @@ public:
 	CEdit show_edit;
 	void injectP1(HWND handle);
 	afx_msg void OnBnClickedButton2();
+	CStringA LoadTextFromResource(int resourceID);
+	CStringW UTF8ToUnicode(const char* utf8Str);
 };

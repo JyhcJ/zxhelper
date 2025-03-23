@@ -12,6 +12,32 @@ QWORD SafeReadQWORD(QWORD* ptr) {
 	}
 	return *(QWORD*)ptr;
 }
+
+float SafeReadFloat(DWORD* ptr) {
+	if (ptr == nullptr || !IsValidPointer(ptr, sizeof(float))) {
+		return -20; // 返回默认值或错误码
+	}
+	return *(float*)ptr;
+}
+
+QWORD SafeReadQWORD_Arry_NotLast(std::vector<QWORD> arry) {
+	size_t i = arry.size();
+	QWORD temp = 0;
+	QWORD ret ;
+	for (QWORD offset : arry)
+	{
+		i--;
+		if (i != 0)
+		{
+			temp = SafeReadQWORD((QWORD*)(temp + offset));
+		}
+		else {
+			ret = temp + offset;
+		}
+	}
+	return ret;
+}
+
 DWORD SafeReadDWORD(DWORD* ptr) {
 	if (ptr == nullptr || !IsValidPointer(ptr, sizeof(DWORD))) {
 		return -30; // 返回默认值或错误码
@@ -172,9 +198,12 @@ bool IsValidPointer(void* ptr, size_t size) {
 void Call_输出调试信息(char* pszFormat, ...)
 {
 #ifdef _DEBUG
-
+	// 定义固定前缀字符串
+	const char* prefix = "[调试信息] ";
 	char szbufFormat[0x1000];
 	char szbufFormat_Game[0x1100] = "";
+	// 将固定前缀拼接到 szbufFormat_Game
+	strcat_s(szbufFormat_Game, prefix);
 	va_list argList;
 	va_start(argList, pszFormat);//参数列表初始化
 	vsprintf_s(szbufFormat, pszFormat, argList);
@@ -183,4 +212,92 @@ void Call_输出调试信息(char* pszFormat, ...)
 	va_end(argList);
 
 #endif
+}
+void Call_输出调试信息W(const wchar_t* pszFormat, ...)
+{
+#ifdef _DEBUG
+	// 定义固定前缀字符串
+	const wchar_t* prefix = L"[调试信息] ";
+	wchar_t szbufFormat[0x1000];
+	wchar_t szbufFormat_Game[0x1100] = L"";
+
+	// 将固定前缀拼接到 szbufFormat_Game
+	wcscat_s(szbufFormat_Game, prefix);
+
+	// 处理可变参数
+	va_list argList;
+	va_start(argList, pszFormat); // 参数列表初始化
+	vswprintf_s(szbufFormat, pszFormat, argList); // 格式化宽字符字符串
+	wcscat_s(szbufFormat_Game, szbufFormat); // 拼接结果
+	OutputDebugStringW(szbufFormat_Game); // 输出 UTF-16 调试信息
+	va_end(argList);
+#endif
+}
+// 定义一个函数来计算三维空间中两点之间的距离
+float calculateDistance(DWORD* myptr, DWORD* objptr) {
+	Call_输出调试信息("1:%p ,,,2:%p ", myptr, objptr);
+	// 计算坐标差值
+	float dx = SafeReadFloat(myptr++) - SafeReadFloat(objptr++);
+	float dz = SafeReadFloat(myptr++) - SafeReadFloat(objptr++);
+	float dy = SafeReadFloat(myptr) - SafeReadFloat(objptr);
+	// 计算距离
+	float distance = sqrt(pow(dx, 2) + pow(dy, 2) + pow(dz, 2));
+	Call_输出调试信息("%f", distance);
+	return distance;
+}
+
+CStringA LoadTextFromResource(int resourceID)
+{
+	HRSRC hResource = FindResource(AfxGetResourceHandle(), MAKEINTRESOURCE(resourceID), _T("txt"));
+	if (!hResource)
+	{
+		AfxMessageBox(_T("Failed to find resource!"));
+		return ("");
+	}
+
+	HGLOBAL hMemory = LoadResource(AfxGetResourceHandle(), hResource);
+	if (!hMemory)
+	{
+		AfxMessageBox(_T("Failed to load resource!"));
+		return ("");
+	}
+
+	DWORD size = SizeofResource(AfxGetResourceHandle(), hResource);
+	LPVOID data = LockResource(hMemory);
+	if (!data)
+	{
+		AfxMessageBox(_T("Failed to lock resource!"));
+		return ("");
+	}
+
+	// 将资源数据转换为CString
+	CStringA text((const char*)data, size);
+	return text;
+}
+
+CStringW UTF8ToUnicode(const char* utf8Str)
+{
+	if (!utf8Str || *utf8Str == '\0')
+	{
+		return CStringW();
+	}
+
+	// 计算需要的宽字符数
+	int wideCharCount = MultiByteToWideChar(CP_UTF8, 0, utf8Str, -1, nullptr, 0);
+	if (wideCharCount == 0)
+	{
+		return CStringW();
+	}
+
+	// 分配缓冲区
+	CStringW unicodeStr;
+	wchar_t* buffer = unicodeStr.GetBuffer(wideCharCount);
+
+	// 转换 UTF-8 到 UTF-16
+	MultiByteToWideChar(CP_UTF8, 0, utf8Str, -1, buffer, wideCharCount);
+
+	// 释放缓冲区
+	unicodeStr.ReleaseBuffer();
+
+	return unicodeStr;
 }

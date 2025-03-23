@@ -1,8 +1,8 @@
 ﻿// test.cpp : 此文件包含 "main" 函数。程序执行将在此处开始并结束。
 //
 
-#include <stdio.h>
-//#include <iostream>
+//#include <stdio.h>
+#include <iostream>
 
 #include <Windows.h>
 #include <windnsdef.h>
@@ -12,12 +12,20 @@ using namespace std;
 
 int main()
 {
-	// 假设 qword 是一个 UTF-16 编码的字符串
-	QWORD q = 0x00000001;
-	QWORD w = 0x00165552;
-	QWORD c = q << 32 | q;
-	printf("%p", c);
+	// 定义 QWORD 类型的变量 q，并赋值为 0x301
+	uint64_t q = 0x301; // QWORD 通常是 64 位无符号整数
 
+	// 将 q 赋值给 size_t 类型的变量 s
+	size_t s = q; // size_t 是无符号整数类型，通常与平台相关（32 位或 64 位）
+
+	// 输出结果
+	std::cout << "!!!" << q  << std::endl;
+	std::cout << "QWORD q = 0x" << std::hex << q << std::dec << " (十六进制)" << std::endl;
+	std::cout << "size_t s = " << s << " (十进制)" << std::endl;
+	for (size_t i = 0; i < q; i++)
+	{
+		std::cout << "!!!" << i << std::endl;
+	}
 	//cout << hex <<q << endl;
 	//5148 58F0 593A 4EBA 793C 76D2 0000 先声夺人礼盒
 	//4E5D 9704 4E91 5929 5916 002A 0000 九霄云外天 *

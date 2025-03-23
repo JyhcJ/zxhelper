@@ -7,10 +7,13 @@
 #include "DLL注入器.h"
 #include "DLL注入器Dlg.h"
 #include "afxdialogex.h"
+#include <iostream>
+//#include "Resource.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
 
 
 // 用于应用程序“关于”菜单项的 CAboutDlg 对话框
@@ -350,20 +353,77 @@ void fun1(CString* ptr) {
 	ptr->SetString(L"5");
 }
 
+
+//// 测试按钮 
 void CDLL注入器Dlg::OnBnClickedButton2()
 {
+	const wchar_t* utf16Str1 = L"// ";
+	const char* utf16Str2 = "// ";
+	const wchar_t* utf16Str3 = L"你";
+	const char* utf16Str4 = "你";
 
-	//ReadUtf8FileAndSplitByNewline();
-	CString* strNumber = new CString();
-	fun1(strNumber);
-	//AfxMessageBox(strNumber->GetString());
 
-	int interval = _ttoi(strNumber->GetString()) * 1000;
 
-	strNumber->Format(_T("%d"), interval);
+	CStringA str = LoadTextFromResource(IDR_TXT1);
 
-	AfxMessageBox(*strNumber);
+	//AfxMessageBox(str.GetString());
 
-	delete strNumber;
+	CString content = UTF8ToUnicode((const char*)str.GetString());
+
+	AfxMessageBox(content.GetString());
 }
 
+CStringW CDLL注入器Dlg::UTF8ToUnicode(const char* utf8Str)
+{
+	if (!utf8Str || *utf8Str == '\0')
+	{
+		return CStringW();
+	}
+	std::cout << utf8Str << std::endl;
+	// 计算需要的宽字符数
+	int wideCharCount = MultiByteToWideChar(CP_UTF8, 0, utf8Str, -1, nullptr, 0);
+	if (wideCharCount == 0)
+	{
+		return CStringW();
+	}
+
+	// 分配缓冲区
+	CStringW unicodeStr;
+	wchar_t* buffer = unicodeStr.GetBuffer(wideCharCount);
+
+	// 转换 UTF-8 到 UTF-16
+	MultiByteToWideChar(CP_UTF8, 0, utf8Str, -1, buffer, wideCharCount);
+
+	// 释放缓冲区
+	unicodeStr.ReleaseBuffer();
+
+	return unicodeStr;
+}
+CStringA  CDLL注入器Dlg::LoadTextFromResource(int resourceID)
+{
+	HRSRC hResource = FindResource(AfxGetResourceHandle(), MAKEINTRESOURCE(resourceID), _T("txt"));
+	if (!hResource)
+	{
+		AfxMessageBox(_T("Failed to find resource!"));
+		return ("");
+	}
+
+	HGLOBAL hMemory = LoadResource(AfxGetResourceHandle(), hResource);
+	if (!hMemory)
+	{
+		AfxMessageBox(_T("Failed to load resource!"));
+		return ("");
+	}
+
+	DWORD size = SizeofResource(AfxGetResourceHandle(), hResource);
+	LPVOID data = LockResource(hMemory);
+	if (!data)
+	{
+		AfxMessageBox(_T("Failed to lock resource!"));
+		return ("");
+	}
+
+	// 将资源数据转换为CString
+	CStringA text((const char*)data, size);
+	return text;
+}
