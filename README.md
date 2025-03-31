@@ -1,1 +1,3 @@
-注入器为了方便调试需要标题为 诛仙 才可注入.
+PythonApplication1
+test
+把这两个文件删除
