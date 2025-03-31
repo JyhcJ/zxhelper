@@ -3,7 +3,8 @@
 //属性基地址
 //const QWORD BASE_ADDRESS_ATT = 0x14171CFD8;
 //const QWORD BASE_ADDRESS_ATT = 14171DFD0;
-const QWORD BASE_ADDRESS_ATT = 0x000000014171DFD0;
+//const QWORD BASE_ADDRESS_ATT = 0x000000014171DFD0;
+const QWORD BASE_ADDRESS_ATT = 0x0000000141725098;
 
 // 一级偏移 OFFSETS_BASE+558气血
 const std::vector<QWORD> OFFSETS_BASE = { 0x38,0x10,0x48,0x10,0x60 };
@@ -50,6 +51,7 @@ struct T人物属性偏移
 struct T人物属性
 {
 	T人物属性偏移 offset;
+	bool 有效性;
 	DWORD d等级;
 	DWORD d血量;
 	DWORD d最大血量;
@@ -65,12 +67,16 @@ struct T人物属性
 	DWORD d对象;
 	FLOAT f距离;
 	wchar_t* p名称;
+
+
+	T人物属性() = default;
 };
 
 
 
 struct T包裹物品属性
 {
+	bool b有效性;
 	wchar_t* p物品名称;
 	QWORD q物品ID;
 	QWORD q数量;

@@ -1,6 +1,9 @@
 #pragma once
+#include <eh.h> // _set_se_translator
+#include <functional>
 #include <vector>
 #include <Windows.h>
+#include <iostream>
 QWORD SafeReadQWORD(QWORD* ptr);
 
 float SafeReadFloat(float* ptr);
@@ -31,5 +34,52 @@ CStringA LoadTextFromResource(int resourceID);
 
 CStringW UTF8ToUnicode(const char* utf8Str);
 
+void PrintRegisters(CONTEXT* ctx);
 
+template <typename Func, typename... Args>
+void _callPlus(Func&& func, Args&&... args) {
+	//HANDLE hHandler = AddVectoredExceptionHandler(1, MyVectoredHandler);
+	//func(args...);
+	//RemoveVectoredExceptionHandler(hHandler);
+
+	CONTEXT ctx;
+	__try
+	{
+	/*	std::function<void()>&& func1 = std::move(func);
+		std::invoke(func1);*/
+		//executeFunction(std::forward<Func>(func));
+		Call_输出调试信息("__try安全调用");
+		//std::invoke(func);
+	}
+	__except (
+		ctx = *(GetExceptionInformation())->ContextRecord,
+		PrintRegisters(&ctx),
+		EXCEPTION_EXECUTE_HANDLER
+		) {
+		DWORD code = GetExceptionCode();
+		Call_输出调试信息("异常代码: 0x%X", code);
+		return;
+	}
+}
+
+// 将SEH异常转换为C++异常
+class SEHException : public std::runtime_error {
+public:
+
+	SEHException(DWORD code, const char* msg, const CONTEXT& ctx)
+		: std::runtime_error(msg), m_code(code), m_context(ctx) {}
+	DWORD getCode() const { return m_code; }
+	const CONTEXT& getContext() const { return m_context; }  // 获取上下文副本
+private:
+	DWORD m_code;
+	CONTEXT m_context;  // 保存上下文副本
+};
+
+void call_asm(std::function<void()>&& func);
+void executeFunction(std::function<void()>&& func);
+void seh_translator(unsigned int code, _EXCEPTION_POINTERS* ep);
+
+LONG __stdcall MyVectoredHandler(EXCEPTION_POINTERS* ExceptionInfo);
+
+void safeCall(std::function<void(QWORD*)> fp, QWORD* params);
 

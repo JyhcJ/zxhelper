@@ -30,9 +30,22 @@ void relex() {
 	//(48 8B CB C1 E8 05 F6 D0 24 01 0F B6 D0 加自己大小)+ 1字节(E8) 读这4字节
 	//读的4字节 + 现地址 +5 = call地址
 	//D0 call 挨着的
-	QWORD callAddress = 0x00000001403834C0;
-	Call_输出调试信息("调试信息:%p \t\t %p", BASE_ADDRESS_ATT, callAddress);
-	call_relex(BASE_ADDRESS_ATT, callAddress);
+	//QWORD callAddress = 0x00000001403834C0;
+	QWORD callAddress = 0x140387880;
+	//Call_输出调试信息("调试信息:%p \t\t %p", BASE_ADDRESS_ATT, callAddress);
+
+	QWORD args[] = { BASE_ADDRESS_ATT, callAddress };
+
+	call_asm([=]()->void 
+		{
+			call_relex(BASE_ADDRESS_ATT, callAddress);
+
+		});
+
+
+	
+	
+	
 }
 // 使用物品
 void useObj(QWORD index, QWORD objId, bool isEncap) {
@@ -44,10 +57,10 @@ void useObj(QWORD index, QWORD objId, bool isEncap) {
 		//call ??挨着的
 		for (QWORD offset : USEOBJ_ENCAP_RCX_OFFSETS)
 		{
-			rcx = SafeReadQWORD((QWORD*)(rcx + offset));
+    rcx = SafeReadQWORD((QWORD*)(rcx + offset));
 		}
 
-		byte bate_array[] = { 0x28,0x00,0x00,0x01,(byte)index,0x00,(byte)objId,(byte)(objId >> 8),(byte)(objId >> 16),0x00 };
+   byte bate_array[] = { 0x28,0x00,0x00,0x01,(byte)index,0x00,(byte)objId,(byte)(objId >> 8),(byte)(objId >> 16),0x00 };
 		//Call_输出调试信息()
 		CString str;
 		for (byte byte1 : bate_array) {
@@ -61,42 +74,50 @@ void useObj(QWORD index, QWORD objId, bool isEncap) {
 		//保留这种形式 提醒不能call_useObj_encap(rcx, bate_array, 0xA, 0x1);//r8=000000000000010A r9=000000001062AB01
 		QWORD r8 = 0x000000000000000A;
 		QWORD r9 = 0x1;
-		QWORD callAddress = 0x00000001409DDA40;
-		call_useObj_encap(rcx, bate_array, r8, r9, callAddress);
+		//QWORD callAddress = 0x00000001409DDA40;
+		QWORD callAddress = 0x00000001409E20B0;
+
+		/*call_asm([=]()->void
+			{*/
+				call_useObj_encap(rcx, const_cast<byte*>(bate_array), static_cast<byte>(r8), static_cast<byte>(r9), callAddress);
+			//});
+
+		
 	}
 	else {
 		//send下第五个
 		//88 44 24 20 45 8B C4 33 D2
 		//call挨着D2
-
-		/*i = USEOBJ_RCX_OFFSETS.size();
-		for (QWORD offset : USEOBJ_RCX_OFFSETS)
-		{
-			i--;
-			if (i != 0)
-			{
-				temp = SafeReadQWORD((QWORD*)(temp + offset));
-			}
-			else {
-				rcx = temp + offset;
-			}
-		}*/
-
 		rcx = SafeReadQWORD_Arry_NotLast(USEOBJ_RCX_OFFSETS);
-		QWORD callAddress = 0x00000001409AB5F0;
+		//QWORD callAddress = 0x00000001409AB5F0;
+		QWORD callAddress = 0x00000001409AFD10;
 		Call_输出调试信息("调试信息:%p	%p	%d	%p	%p", rcx, 0x0, index, objId, callAddress);
-		call_useObj(rcx, 0x0, index, objId, callAddress);
+		
+		QWORD rdx=0x0;
+
+		QWORD params[] = { rcx, rdx, index, objId, callAddress };
+		/*call_asm([=]()->void
+			{*/
+				call_useObj(rcx, 0x0, index, objId, callAddress);
+			//});
 	}
 }
 // 选中对象
 void selectObj(DWORD id) {
 	//send下第六个
-	//48 8B 15 ?? ?? ?? ?? 48 8B 4A ?? 8B D0 48 81 C1 70 01 00 00 E8 ?? ?? ?? ?? 45 33 C0 8B D7
-	//E8 后面就是call地址
-	QWORD callAddress = 0x1409AB4F0;
+	//48 8B 15 ?? ?? ?? ?? 48 8B 4A ?? 8B D0 48 81 C1 70 01 00 00 E8 ?? ?? ?? ?? 45 33 C0 8B D7    E8 后面就是call地址
+	//3B C3 0F 84 9A 00 00 00 89 86 ?? ?? ?? ?? 48 8B 15 ?? ?? ?? ?? 48 8B 4A ?? 8B D0         D0后面可能有个ADD下面就是
+	
+	//QWORD callAddress = 0x1409AB4F0;
+	QWORD callAddress = 0x00000001409AFC10;
 
 	Call_输出调试信息("参数1:%p,参数2:%p,参数3:%p", BASE_ADDRESS_ATT, id, callAddress);
-	call_Select(BASE_ADDRESS_ATT, id, callAddress);
+	//call_Select(BASE_ADDRESS_ATT, id, callAddress);
+	call_asm([=]()->void
+		{
+			call_Select(BASE_ADDRESS_ATT, id, callAddress);
+		});
+
 }
 
 // 逐霜黑龙袭脚底瞬移
@@ -105,20 +126,22 @@ void teleportation(DWORD obj_location_ptr) {
 	//45 33 C9 45 0F B6 C4 8B 52 ? ? 48 81 C1 70 01 00 00
 	//结尾00 挨着就是call
 
-	QWORD callAddress = 0x1409AB1B0;
+	//QWORD callAddress = 0x1409AB1B0;
+	QWORD callAddress = 0x00000001409AF8D0;
 	QWORD rdx = 0x1ECF;  //逐霜 黑龙袭
 	QWORD r8 = 0x0;
 	QWORD r9 = 0x0;
 	QWORD rsp20 = obj_location_ptr;
 	QWORD rsp28 = 0x0;
-	call_teleportation(BASE_ADDRESS_ATT, rdx, r8, r9, rsp20, rsp28, callAddress);
+	//call_teleportation(BASE_ADDRESS_ATT, rdx, r8, r9, rsp20, rsp28, callAddress);
+	call_asm([=]()->void
+		{
+			call_teleportation(BASE_ADDRESS_ATT, rdx, r8, r9, rsp20, rsp28, callAddress);
+		});
+
+
 }
 
-// 使用回城卷
-void goHome() {
-	traversePackage();
-	seekCityRoll();
-}
 // 喊话
 void hanHua(CString str) {
 	//Call_输出调试信息("调试信息:!!!");
@@ -130,8 +153,14 @@ void hanHua(CString str) {
 		//Call_输出调试信息("调试信息:!!!%p", str);
 		QWORD rcx = SafeReadQWORD((QWORD*)(BASE_ADDRESS_ATT));
 		rcx = SafeReadQWORD((QWORD*)(rcx + 0x40));
-		QWORD callAddress = 0x00000001409DD520;
-		call_hanHua(rcx, NULL, str, callAddress);
+		//QWORD callAddress = 0x00000001409DD520;
+		QWORD callAddress = 0x00000001409E1B90;
+		call_asm([=]()->void
+			{
+				call_hanHua(rcx, NULL, str, callAddress);
+			});
+
+	
 	}
 }
 // 遍历背包
@@ -142,6 +171,12 @@ std::vector<T包裹物品属性> traversePackage() {
 	OBJS_ATT.clear();
 
 	QWORD tfirst = SafeReadQWORD((QWORD*)(BASE_ADDRESS_ATT));
+	if (tfirst > 0XFFFFFFFFFFFF) {
+		obj.b有效性 = false;
+		Call_输出调试信息("读取包裹首地址出错tfirst : %p  ..." , tfirst);
+		return std::vector<T包裹物品属性>();
+	}
+
 
 	for (QWORD offset : objOffset.d一级偏移vector)
 	{
@@ -214,9 +249,14 @@ std::vector<T人物属性> traversePerson() {
 	//4C 8D 45 B7 48 8D 55 D7 48 8D 4D FF
 
 	QWORD startAdd = SafeReadQWORD((QWORD*)(SafeReadQWORD_Arry_NotLast(PERSON_AROUD_OFFSETS) + 0x10));
-	Call_输出调试信息("调试信息:startAdd = %p", startAdd);
+	Call_输出调试信息("周围玩家人物startAdd = %p", startAdd);
+	if (startAdd > 0XFFFFFFFFFFFF) {
+		Call_输出调试信息("读取周围玩家人物出错startAdd : %p  ...", startAdd);
+		return std::vector<T人物属性>();
+	}
+
 	QWORD size = SafeReadQWORD((QWORD*)(SafeReadQWORD_Arry_NotLast(PERSON_AROUD_OFFSETS) + 0x28));
-	Call_输出调试信息("调试信息:size = %d", size);
+	Call_输出调试信息("周围玩家人物size = %d", size);
 	QWORD objCount = 0;
 	QWORD obj = 0;
 	T人物属性 obj_att;
@@ -235,7 +275,7 @@ std::vector<T人物属性> traversePerson() {
 			DWORD temp = SafeReadDWORD((DWORD*)(obj + 8));
 			obj_att.d等级 = SafeReadDWORD((DWORD*)(temp + obj_att.offset.d等级偏移));
 			obj_att.d血量 = SafeReadDWORD((DWORD*)(temp + obj_att.offset.d血量偏移));
-			obj_att.p坐标ptr = (DWORD*)(temp + obj_att.offset.fX偏移);
+			obj_att.p坐标ptr = (DWORD*)((QWORD)temp + obj_att.offset.fX偏移);
 			obj_att.f距离 = calculateDistance(tperson.p坐标ptr, obj_att.p坐标ptr);
 			obj_att_arry.push_back(obj_att);
 			objCount++;
@@ -251,9 +291,11 @@ std::vector<T技能> traverseSkill() {
 	QWORD address_一级 = 0;
 	for (QWORD offset : TSkill.skillOffsets.offsets_一级) {
 		address_一级 = SafeReadQWORD((QWORD*)(address_一级 + offset));
+		if (address_一级 > 0XFFFFFFFFFFFF) {
+			return std::vector<T技能>();
+		}
 		//Call_输出调试信息("1:%p ", address_一级);
 		//Call_输出调试信息("2:%p ", offset);
-
 	}
 	size_t skillMax = SafeReadDWORD((DWORD*)(address_一级 + TSkill.skillOffsets.offset_技能遍历最大数量));
 	//Call_输出调试信息("一级地址:%p ", address_一级);
@@ -262,7 +304,7 @@ std::vector<T技能> traverseSkill() {
 	//for (size_t i = 0; i < skillMax; i++)
 	for (size_t i = 0; i < skillMax; i++)
 	{
-		if (EXITFLAG) {
+		if (g_exitFLag) {
 			break;
 		}
 		//Call_输出调试信息("i: %llu, skillMax: %llu", i, skillMax);
@@ -274,7 +316,6 @@ std::vector<T技能> traverseSkill() {
 		TSkill.d技能最大冷却时间 = SafeReadDWORD((DWORD*)(address_技能对象 + TSkill.skillOffsets.offset_技能最大冷却时间));
 		TSkill.d技能对象 = address_技能对象;
 
-
 		Call_输出调试信息("address_技能对象:%p ", address_技能对象);
 		Call_输出调试信息("qq技能ID:%d ", TSkill.d技能ID);
 		//Call_输出调试信息("q技能冷却时间:%d ", TSkill.q技能冷却时间);
@@ -284,7 +325,6 @@ std::vector<T技能> traverseSkill() {
 		{
 			break;
 		}
-
 
 		for (const CString& index : Viewer_packet::cSKILL_NAME_ARRY)
 		{
@@ -320,11 +360,8 @@ std::vector<T技能> traverseSkill() {
 
 				break;
 			}
-			
 		}
 		TSkills.push_back(TSkill);
-
-
 
 		/*QWORD 技能名称temp = address_技能对象;
 		for (QWORD offset : TSkill.skillOffsets.offsets_技能名称)
@@ -336,11 +373,10 @@ std::vector<T技能> traverseSkill() {
 		//wchar_t constrcName[15];
 		//try
 		//{
-		//	
+		//
 		//	wchar_t* wptr = (wchar_t*)技能名称temp;
 		//	wptr++; //忽略第一个f
 		//	wchar_t terminator = 0x3000;
-
 
 		//	for (size_t i = 0; i < 15; i++)
 		//	{
@@ -357,9 +393,6 @@ std::vector<T技能> traverseSkill() {
 		//	Call_输出调试信息("技能名称字符串转化失败");
 		//}
 
-
-
-
 		//Call_输出调试信息("constrcName:%p ", constrcName);
 		/*if (isString((QWORD*)constrcName, 15))
 		{
@@ -371,12 +404,14 @@ std::vector<T技能> traverseSkill() {
 }
 
 
-void seekCityRoll() {
-	const CString cityRollName = L"回城券";
-}
 // 获取自身人物属性
 T人物属性  getPersonAtt() {
 	QWORD userName = SafeReadQWORD((QWORD*)tPersonOffset.BASE_ADDRESS_NAME);
+	if (userName > 0XFFFFFFFFFFFF) {
+		tperson.有效性 = false;
+		return T人物属性();
+	}
+
 	if (isString((QWORD*)userName, 20)) {
 		tperson.p名称 = (wchar_t*)userName;
 	}
@@ -388,7 +423,10 @@ T人物属性  getPersonAtt() {
 	for (QWORD offset : tPersonOffset.d一级偏移vector)
 	{
 		tfirst = SafeReadQWORD((QWORD*)(tfirst + offset));
+		
 	}
+
+
 
 	if (tPersonOffset.d一级偏移r == 0) {
 		tPersonOffset.d一级偏移r = tfirst;
@@ -400,6 +438,7 @@ T人物属性  getPersonAtt() {
 	tperson.d元力 = SafeReadDWORD((DWORD*)(tfirst + tPersonOffset.d元力偏移));
 	tperson.d无视 = SafeReadDWORD((DWORD*)(tfirst + tPersonOffset.d无视偏移));
 	tperson.d减免 = SafeReadDWORD((DWORD*)(tfirst + tPersonOffset.d减免偏移));
+	tperson.有效性 =true;
 
 	return tperson;
 }
@@ -440,7 +479,7 @@ bool isString(QWORD* ptr, size_t maxLength = 20) {
 }
 
 QWORD getAtt_TBaseAddress() {
-	__try {
+	//__try {
 		QWORD baseValue = SafeReadQWORD((QWORD*)(BASE_ADDRESS_ATT));
 		baseValue = SafeReadQWORD((QWORD*)(baseValue + 0x38));
 		baseValue = SafeReadQWORD((QWORD*)(baseValue + 0x10));
@@ -449,11 +488,11 @@ QWORD getAtt_TBaseAddress() {
 		baseValue = SafeReadQWORD((QWORD*)(baseValue + 0x60));
 		TEMP_FIRSTOFFSET = baseValue;
 		return baseValue;
-	}
-	__except (GetExceptionCode() == EXCEPTION_ACCESS_VIOLATION ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH) {
-		AfxMessageBox(L"读取属性基地址异常");
-		MessageBox(NULL, L"读取属性基地址异常", NULL, 0U);
-		//exit(1);
-		return -20; // 返回默认值或错误码
-	}
+	//}
+	//__except (GetExceptionCode() == EXCEPTION_ACCESS_VIOLATION ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH) {
+	//	AfxMessageBox(L"读取属性基地址异常");
+	//	MessageBox(NULL, L"读取属性基地址异常", NULL, 0U);
+	//	//exit(1);
+	//	return -20; // 返回默认值或错误码
+	//}
 }

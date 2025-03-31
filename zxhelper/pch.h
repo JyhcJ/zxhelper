@@ -11,4 +11,4 @@
 #include "framework.h"
 
 #endif //PCH_H
-static bool EXITFLAG = false;
+static bool g_exitFLag = false;

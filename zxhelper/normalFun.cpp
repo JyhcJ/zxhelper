@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "normalFun.h"
 #include "zxhelper.h"
-#include <iostream>
 #include <vector>
+#include <functional>
 //#include "afxdialogex.h"
 
 //安全返回参数地址的值
@@ -23,7 +23,7 @@ float SafeReadFloat(DWORD* ptr) {
 QWORD SafeReadQWORD_Arry_NotLast(std::vector<QWORD> arry) {
 	size_t i = arry.size();
 	QWORD temp = 0;
-	QWORD ret ;
+	QWORD ret = 0 ;
 	for (QWORD offset : arry)
 	{
 		i--;
@@ -241,7 +241,7 @@ float calculateDistance(DWORD* myptr, DWORD* objptr) {
 	float dz = SafeReadFloat(myptr++) - SafeReadFloat(objptr++);
 	float dy = SafeReadFloat(myptr) - SafeReadFloat(objptr);
 	// 计算距离
-	float distance = sqrt(pow(dx, 2) + pow(dy, 2) + pow(dz, 2));
+	float distance = sqrtf(powf(dx, 2.0f) + powf(dy, 2.0f) + powf(dz, 2.0f));
 	Call_输出调试信息("%f", distance);
 	return distance;
 }
@@ -300,4 +300,71 @@ CStringW UTF8ToUnicode(const char* utf8Str)
 	unicodeStr.ReleaseBuffer();
 
 	return unicodeStr;
+}
+
+// 不能用%P
+void PrintRegisters( CONTEXT* ctx) {
+	Call_输出调试信息("异常发生时寄存器状态: RCX=0x%p , RDX=0x%p , R8=0x%p , R9=0x%p", ctx->Rcx, ctx->Rdx, ctx->R8, ctx->R9);
+	Call_输出调试信息("异常发生时寄存器状态: RDI=0x%p , RAX=0x%p , RBX=0x%p", ctx->Rdi, ctx->Rax, ctx->Rbx);
+	Call_输出调试信息("异常发生时寄存器状态: RSP=0x%p , RBP=0x%p", ctx->Rsp, ctx->Rbp);
+}
+
+
+void call_asm(std::function<void()>&& func) {
+    CONTEXT ctx;
+
+    __try
+    {
+        // Move the function object to a local variable
+
+        // Call the function
+		std::invoke(func);
+  
+        Call_输出调试信息("__try安全调用_call");
+    }
+    __except (
+        ctx = *(GetExceptionInformation())->ContextRecord,
+        PrintRegisters(&ctx),
+        EXCEPTION_EXECUTE_HANDLER
+        ) {
+        DWORD code;
+        code = GetExceptionCode();
+        Call_输出调试信息("异常代码: 0x%X", code);
+    
+        return;
+    }
+}
+
+void seh_translator(unsigned int code, _EXCEPTION_POINTERS* ep) {
+	if (ep && ep->ContextRecord) {
+		// 将 SEH 异常信息和上下文一起抛出
+		throw SEHException(
+			code,
+			"SEH异常",
+			*ep->ContextRecord  // 复制上下文
+		);
+	}
+	else {
+		throw SEHException(code, "SEH异常（无上下文）", CONTEXT{});
+	}
+}
+
+LONG WINAPI MyVectoredHandler(EXCEPTION_POINTERS* ExceptionInfo) {
+	//std::cout << "捕获到异常: " << std::hex << ExceptionInfo->ExceptionRecord->ExceptionCode << std::endl;
+	Call_输出调试信息("捕获到异常: 0x%X", ExceptionInfo->ExceptionRecord->ExceptionCode);
+	return EXCEPTION_CONTINUE_SEARCH;
+}
+
+void safeCall(std::function<void(QWORD*)> fp, QWORD* params) {
+	HANDLE hHandler = AddVectoredExceptionHandler(1, MyVectoredHandler);
+	fp(params);
+	RemoveVectoredExceptionHandler(hHandler);
+	/*try
+	{
+		fp(params);
+	}
+	catch (const SEHException& e) {
+		Call_输出调试信息("SEH异常代码: 0x%X, 消息: %s", e.getCode(), e.what());
+		PrintRegisters(e.getContext());
+	}*/
 }

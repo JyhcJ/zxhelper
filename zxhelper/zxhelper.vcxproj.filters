@@ -88,6 +88,9 @@
     <ClInclude Include="Viewer_packet.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="counst.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="zxhelper.rc">

@@ -104,12 +104,12 @@ void Viewer_packet::showObject() {
 	std::vector<T包裹物品属性> objs;
 
 	objs = traversePackage();
-
+	
 	size_t count = objs.size();
 	if (count == 0)
 	{
 		AfxMessageBox(_T("读取包裹失败了!"));
-		EndDialog(IDOK);
+		//EndDialog(IDOK);不关闭窗口
 		return;
 	}
 
@@ -412,7 +412,7 @@ void Viewer_packet::OnBnClickedButton4()
 		CString strItemText = m_CListCtrl.GetItemText(nSelectedIndex, 0);  // 获取选中项的文本
 		DWORD_PTR ptr = m_CListCtrl.GetItemData(nSelectedIndex);
 		Call_输出调试信息("脚底瞬移对象坐标指针:%p", ptr);
-		teleportation(ptr);
+		teleportation(static_cast<DWORD>(ptr));
 	}
 	else {
 		AfxMessageBox(_T("没有选中人物对象"));

@@ -33,6 +33,18 @@
     <ClInclude Include="pch.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="testDialog.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="mainController.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="PipeServer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="const.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DLL注入器.cpp">
@@ -42,6 +54,15 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="testDialog.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="mainController.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PipeServer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

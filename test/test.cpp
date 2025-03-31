@@ -26,6 +26,29 @@ int main()
 	{
 		std::cout << "!!!" << i << std::endl;
 	}
+	QWORD a = 1;
+	QWORD b = 2;
+	QWORD c = 3;
+
+	QWORD* datas = &a;
+	QWORD* datasAddress = datas;
+
+	std::cout << datas << std::endl;
+	std::cout << datasAddress << std::endl;
+
+	*datas = c;
+	std::cout << *datas << std::endl;
+	std::cout << datasAddress << std::endl;
+	datas++;
+	std::cout << datas << std::endl;
+	std::cout << datasAddress << std::endl;
+	std::cout << *datasAddress << std::endl;
+	std::cout << a << std::endl;
+
+
+	//std::cout <<  <<  std::endl;
+	//std::cout << datasAddress << std::endl;
+
 	//cout << hex <<q << endl;
 	//5148 58F0 593A 4EBA 793C 76D2 0000 先声夺人礼盒
 	//4E5D 9704 4E91 5929 5916 002A 0000 九霄云外天 *

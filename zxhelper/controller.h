@@ -1,7 +1,6 @@
 #pragma once
 #include "T_obj.h"
 
-
 void relex();
 
 void useObj(QWORD index, QWORD objId, bool isEncap);
@@ -18,7 +17,7 @@ std::vector<T人物属性> traversePerson();
 
 std::vector<T技能> traverseSkill();
 
-void seekCityRoll();
+
 
 T人物属性 getPersonAtt();
 

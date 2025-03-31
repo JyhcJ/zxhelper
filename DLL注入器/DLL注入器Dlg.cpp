@@ -1,20 +1,36 @@
-﻿
-// DLL注入器Dlg.cpp: 实现文件
+﻿// DLL注入器Dlg.cpp: 实现文件
 //
 
 #include "pch.h"
-#include "framework.h"
+#include "afxdialogex.h"
 #include "DLL注入器.h"
 #include "DLL注入器Dlg.h"
-#include "afxdialogex.h"
+#include "framework.h"
+#include "mainController.h"
+#include "PipeServer.h"
 #include <iostream>
-//#include "Resource.h"
+#include <windows.h>
+#include "const.h"
+
+
+extern const char* DLL_PATH;
+extern const wchar_t* DLL_NAME;
+
+HANDLE g_hPipeThread;
+
+HANDLE g_hPipe;
+
+std::vector<std::pair<DWORD, QWORD>>g_dllHwnds;
+
+//std::map<DWORD, HWND> hwndMap;
+
+PipeServer pipeServer;
+
+std::vector<QWORD> arry_pipeServer;
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
-
 
 // 用于应用程序“关于”菜单项的 CAboutDlg 对话框
 
@@ -48,10 +64,7 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
 END_MESSAGE_MAP()
 
-
 // CDLL注入器Dlg 对话框
-
-
 
 CDLL注入器Dlg::CDLL注入器Dlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_DLL_DIALOG, pParent)
@@ -63,6 +76,7 @@ void CDLL注入器Dlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_EDIT1, show_edit);
+	DDX_Control(pDX, IDC_LIST1, m_ListBox);
 }
 
 BEGIN_MESSAGE_MAP(CDLL注入器Dlg, CDialogEx)
@@ -72,8 +86,9 @@ BEGIN_MESSAGE_MAP(CDLL注入器Dlg, CDialogEx)
 	ON_BN_CLICKED(IDOK, &CDLL注入器Dlg::OnBnClickedOk)
 	ON_BN_CLICKED(IDC_BUTTON1, &CDLL注入器Dlg::OnBnClickedButton1)
 	ON_BN_CLICKED(IDC_BUTTON2, &CDLL注入器Dlg::OnBnClickedButton2)
+	ON_BN_CLICKED(IDC_BUTTON3, &CDLL注入器Dlg::OnBnClickedButton3)
+	ON_BN_CLICKED(IDC_BUTTON4, &CDLL注入器Dlg::OnBnClickedButton4)
 END_MESSAGE_MAP()
-
 
 // CDLL注入器Dlg 消息处理程序
 BOOL Call_提升权限(BOOL bEnable) //OpenProcess失败的情况调用
@@ -92,12 +107,13 @@ BOOL Call_提升权限(BOOL bEnable) //OpenProcess失败的情况调用
 	}
 	return fOK;
 }
+
 BOOL CDLL注入器Dlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
 	// 将“关于...”菜单项添加到系统菜单中。
-
+	myInit();
 	// IDM_ABOUTBOX 必须在系统命令范围内。
 	ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
 	ASSERT(IDM_ABOUTBOX < 0xF000);
@@ -175,186 +191,112 @@ HCURSOR CDLL注入器Dlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-BOOL dll_inject(HANDLE processHandle, const char* dll) {
-	LPVOID address = VirtualAllocEx(processHandle, NULL, 256, MEM_COMMIT, PAGE_READWRITE);
-	if (address == NULL)
-	{
-		MessageBoxW(NULL, L"分配内存失败!", NULL, MB_OK);
-		return FALSE;
-	}
-
-	BOOL ret = WriteProcessMemory(processHandle, address, dll, strlen(dll) + 1, NULL);
-	if (ret == NULL)
-	{
-		MessageBoxW(NULL, L"写内存失败!", NULL, MB_OK);
-		return FALSE;
-	}
-	HANDLE	threadHandle = CreateRemoteThread(processHandle, NULL, NULL, (LPTHREAD_START_ROUTINE)LoadLibraryA, address, NULL, NULL);
-	if (threadHandle == NULL)
-	{
-		MessageBoxW(NULL, L"创建远程线程失败!", NULL, MB_OK);
-		VirtualFreeEx(processHandle, address, 0, MEM_RELEASE);
-		return FALSE;
-	}
-	WaitForSingleObject(threadHandle, INFINITE);
-	CloseHandle(threadHandle);
-	VirtualFreeEx(processHandle, address, 0, MEM_RELEASE);
-	CloseHandle(processHandle);
-	return TRUE;
+// 自定义初始化	
+void CDLL注入器Dlg::myInit() {
+	// 枚举所有窗口
+	EnumWindows(EnumWindowsProc, reinterpret_cast<LPARAM>(TARGET_CLASSNAME));
 }
-
-void CDLL注入器Dlg::injectP1(HWND handle) {
-	DWORD pid;
-	//Call_提升权限(TRUE);
-	GetWindowThreadProcessId(handle, &pid);
-
-	if (pid == NULL)
-	{
-		MessageBoxW(L"获取 ""pid 失败", NULL, MB_OK);
-		return;
-	}
-	HANDLE process = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
-	if (process == NULL)
-	{
-		MessageBoxW(L"打开 process 失败", NULL, MB_OK);
-		return;
-	}
-	CString rString;
-	show_edit.GetWindowTextW(rString);
-	if (rString.IsEmpty())
-	{
-		dll_inject(process, "C:/Users/54469/Desktop/zxhelper/zxhelper/x64/Debug/zxhelper.dll");
-		//dll_inject(process, "C:/Users/54469/Desktop/zxhelper/zxhelper/x64/Debug/定位工具/定位.dll");
-	}
-	else {
-		dll_inject(process, (const char*)rString.GetString());
-	}
-
-}
-
+// 注入并关闭
 void CDLL注入器Dlg::OnBnClickedOk()
 {
-	// TODO: 在此添加控件通知处理程序代码
 	CDialogEx::OnOK();
-	HWND handle = ::FindWindow(NULL, L"诛仙");
-	if (handle == NULL)
+	OnBnClickedButton4();
+}
+// 注入按钮
+void CDLL注入器Dlg::OnBnClickedButton4()
+{
+	
+	// TODO: 在此添加控件通知处理程序代码
+	int nSelectedCount = m_ListBox.GetSelCount();
+	if (nSelectedCount == LB_ERR || nSelectedCount == 0)
 	{
-		MessageBoxW(L"没有找到 诛仙 窗口", NULL, MB_OK);
+		AfxMessageBox(_T("没有选中注入目标！"));
 		return;
 	}
-	injectP1(handle);
-}
 
+	// 分配缓冲区存储选中的项索引
+	CArray<int, int> arySelectedIndices;
+	arySelectedIndices.SetSize(nSelectedCount);
+	m_ListBox.GetSelItems(nSelectedCount, arySelectedIndices.GetData());
+
+	// 遍历选中的项，获取文本
+	CString strSelectedItems;
+	arry_pipeServer.clear();
+	for (int i = 0; i < nSelectedCount; i++)
+	{
+		int nIndex = arySelectedIndices[i];
+		HWND hwnd = (HWND)m_ListBox.GetItemData(nIndex);
+		m_ListBox.GetText(nIndex, strSelectedItems);
+		if (strSelectedItems.Find(L"[注入]") == -1)
+		{
+
+			cereatePipeAndGetProHandle(hwnd);
+			//hwndMap.insert(std::make_pair(GetCurrentProcessId(), hwnd));
+			//if (cereatePipeAndGetProHandle(hwnd))
+			//{
+			//	strSelectedItems += _T(" [注入]");
+			//	m_ListBox.DeleteString(nIndex);            // 删除原项
+			//	m_ListBox.InsertString(nIndex, strSelectedItems);    // 在原位置插入新文本
+			//	m_ListBox.SetItemData(nIndex, (DWORD_PTR)hwnd);
+			//}
+
+
+		}
+		else {
+			DWORD pid;
+			HWND dllHwnd = NULL;
+			//Call_提升权限(TRUE);
+			GetWindowThreadProcessId(hwnd, &pid);
+			
+			// first:PID   second:dllHwnd
+			for(std::pair<DWORD,QWORD> onePair : g_dllHwnds)
+			{	
+				Call_输出调试信息("注入器onePair.first:%d", onePair.first);
+				Call_输出调试信息("注入器onePair.second:%d", onePair.second);
+				Call_输出调试信息("注入器pid.second:%d", pid);
+				if (pid == onePair.first)
+				{
+					dllHwnd = reinterpret_cast<HWND>(onePair.second);
+				}
+			
+			}
+		
+			if (dllHwnd != NULL)
+			{
+				Call_输出调试信息("注入器PostMessageW :%d", dllHwnd);
+				::PostMessageW(dllHwnd, WM_MY_CROSS_PROCESS_MSG, (WPARAM)WM_MY_CROSS_PROCESS_MSG_QUIT, 1);
+
+			}
+			
+			//PrintModules(pid);
+		}
+
+	}
+
+	pipeServer.SetDatas(arry_pipeServer);
+	OnBnClickedButton3();
+}
+// 注入记事本
 void CDLL注入器Dlg::OnBnClickedButton1()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	HWND hwndNotepad = ::FindWindow(L"Notepad", NULL);
-	injectP1(hwndNotepad);
-}
-
-void ReadUtf8FileAndSplitByNewline()
-{
-	// 创建文件选择对话框
-	CFileDialog fileDlg(TRUE);  // TRUE 表示打开文件对话框
-	fileDlg.m_ofn.lpstrTitle = _T("选择文件");  // 设置对话框标题
-	fileDlg.m_ofn.lpstrFilter = _T("文本文件 (*.txt)\0*.txt\0所有文件 (*.*)\0*.*\0");  // 设置文件过滤器
-
-	CString filePath;
-	if (fileDlg.DoModal() == IDOK)
+	if (hwndNotepad == NULL)
 	{
-		filePath = fileDlg.GetPathName();  // 获取用户选择的文件路径
-		if (filePath.IsEmpty())
-		{
-			AfxMessageBox(_T("未选择文件！"));
-			return;
-		}
-	}
-	else
-	{
-		return; // 用户取消选择
-	}
-
-	// 打开文件
-	CStdioFile file;
-	if (!file.Open(filePath, CFile::modeRead | CFile::typeBinary))
-	{
-		AfxMessageBox(_T("无法打开文件！"));
+		AfxMessageBox(_T("未找到记事本窗口！"));
 		return;
 	}
+	else {
+		arry_pipeServer.clear();
+		cereatePipeAndGetProHandle(hwndNotepad);
+		//hwndMap.insert(std::make_pair(GetCurrentProcessId(), hwndNotepad));
+		pipeServer.SetDatas(arry_pipeServer);
 
-	// 获取文件大小
-	ULONGLONG fileSize = file.GetLength();
-	if (fileSize == 0)
-	{
-		AfxMessageBox(_T("文件为空！"));
-		file.Close();
-		return;
 	}
 
-	// 读取文件内容
-	CStringA contentA;
-	char* buffer = contentA.GetBuffer(static_cast<int>(fileSize));
-	file.Read(buffer, static_cast<UINT>(fileSize));
-	contentA.ReleaseBuffer();
-	file.Close();
-
-	// 检查并跳过 UTF-8 BOM（如果存在）
-	const char* pData = contentA.GetString();
-	if (fileSize >= 3 && static_cast<unsigned char>(pData[0]) == 0xEF &&
-		static_cast<unsigned char>(pData[1]) == 0xBB &&
-		static_cast<unsigned char>(pData[2]) == 0xBF)
-	{
-		pData += 3; // 跳过 BOM
-		contentA = pData; // 重新赋值
-	}
-
-	// 将 UTF-8 转换为 Unicode
-	int length = MultiByteToWideChar(CP_UTF8, 0, contentA, -1, nullptr, 0);
-	if (length <= 0)
-	{
-		AfxMessageBox(_T("文件内容转换失败！"));
-		return;
-	}
-
-	CString contentW;
-	MultiByteToWideChar(CP_UTF8, 0, contentA, -1, contentW.GetBuffer(length), length);
-	contentW.ReleaseBuffer();
-
-	// 按换行符分割内容
-	CStringArray lines; // 存储分割后的行
-	int start = 0;
-	int end = contentW.Find(_T("\n")); // 查找换行符
-
-	while (end != -1)
-	{
-		CString line = contentW.Mid(start, end - start); // 提取一行
-		line.TrimRight(_T("\r")); // 去除可能的回车符
-		lines.Add(line); // 添加到数组
-		start = end + 1; // 移动到下一行
-		end = contentW.Find(_T("\n"), start); // 继续查找换行符
-	}
-
-	// 添加最后一行（如果没有换行符结尾）
-	if (start < contentW.GetLength())
-	{
-		CString line = contentW.Mid(start);
-		line.TrimRight(_T("\r")); // 去除可能的回车符
-		lines.Add(line);
-	}
-
-	// 输出分割后的内容
-	for (int i = 0; i < lines.GetSize(); i++)
-	{
-		AfxMessageBox(lines[i]); // 弹出消息框显示每一行
-	}
 }
 
-void fun1(CString* ptr) {
-	ptr->SetString(L"5");
-}
-
-
-//// 测试按钮 
+// 测试按钮
 void CDLL注入器Dlg::OnBnClickedButton2()
 {
 	const wchar_t* utf16Str1 = L"// ";
@@ -362,68 +304,108 @@ void CDLL注入器Dlg::OnBnClickedButton2()
 	const wchar_t* utf16Str3 = L"你";
 	const char* utf16Str4 = "你";
 
-
-
-	CStringA str = LoadTextFromResource(IDR_TXT1);
-
-	//AfxMessageBox(str.GetString());
-
-	CString content = UTF8ToUnicode((const char*)str.GetString());
-
-	AfxMessageBox(content.GetString());
 }
 
-CStringW CDLL注入器Dlg::UTF8ToUnicode(const char* utf8Str)
-{
-	if (!utf8Str || *utf8Str == '\0')
+// 添加字符串到列表框
+void CDLL注入器Dlg::addString(wchar_t* windowTitle, HWND hwnd,bool isInject) {
+	CString str;
+	if (isInject)
 	{
-		return CStringW();
+		str.Format(L"[注入]%s %X", windowTitle, hwnd);
 	}
-	std::cout << utf8Str << std::endl;
-	// 计算需要的宽字符数
-	int wideCharCount = MultiByteToWideChar(CP_UTF8, 0, utf8Str, -1, nullptr, 0);
-	if (wideCharCount == 0)
-	{
-		return CStringW();
+	else {
+		str.Format(L"%s %X", windowTitle, hwnd);
 	}
 
-	// 分配缓冲区
-	CStringW unicodeStr;
-	wchar_t* buffer = unicodeStr.GetBuffer(wideCharCount);
+	m_ListBox.AddString(str.GetString());
+	int index = m_ListBox.GetCount();
+	m_ListBox.SetItemData(index - 1, (DWORD_PTR)hwnd);
 
-	// 转换 UTF-8 到 UTF-16
-	MultiByteToWideChar(CP_UTF8, 0, utf8Str, -1, buffer, wideCharCount);
-
-	// 释放缓冲区
-	unicodeStr.ReleaseBuffer();
-
-	return unicodeStr;
 }
-CStringA  CDLL注入器Dlg::LoadTextFromResource(int resourceID)
+
+// 刷新 枚举窗口按钮
+void CDLL注入器Dlg::OnBnClickedButton3()
 {
-	HRSRC hResource = FindResource(AfxGetResourceHandle(), MAKEINTRESOURCE(resourceID), _T("txt"));
-	if (!hResource)
+	// TODO: 在此添加控件通知处理程序代码
+	m_ListBox.ResetContent();
+
+	// 枚举所有窗口
+	EnumWindows(EnumWindowsProc, reinterpret_cast<LPARAM>(TARGET_CLASSNAME));
+
+	
+}
+// 回调函数：枚举窗口
+BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam)
+{
+	
+	const wchar_t* targetClassName = reinterpret_cast<const wchar_t*>(lParam); // 目标类名
+
+	wchar_t className[256] = { 0 };
+	GetClassNameW(hwnd, className, 256); // 获取窗口类名
+
+	// 如果类名匹配
+	if (wcscmp(className, targetClassName) == 0)
 	{
-		AfxMessageBox(_T("Failed to find resource!"));
-		return ("");
+		QWORD pid;
+		GetWindowThreadProcessId(hwnd, (LPDWORD)&pid);
+		HMODULE hMod = GetRemoteModuleHandle(static_cast<DWORD>(pid), DLL_NAME);
+		bool isInject;
+		if (hMod) {
+			isInject = true;
+		}
+		else {
+			isInject = false;
+		}
+
+		wchar_t windowTitle[256] = { 0 };
+		GetWindowTextW(hwnd, windowTitle, 256); // 获取窗口标题
+		if (wcslen(windowTitle) > 0)
+		{
+		
+			//std::wcout << L"窗口标题: " << windowTitle << std::endl;
+			CDLL注入器Dlg* pDlg = reinterpret_cast<CDLL注入器Dlg*>(AfxGetMainWnd());
+
+
+			if (pDlg != nullptr)
+			{
+		
+				pDlg->addString(windowTitle, hwnd, isInject);
+				//hwndMap.insert(std::make_pair(GetWindowThreadProcessId(hwnd, NULL), hwnd));
+
+			}
+
+			//m_ListBox.setItemData();
+		}
 	}
 
-	HGLOBAL hMemory = LoadResource(AfxGetResourceHandle(), hResource);
-	if (!hMemory)
-	{
-		AfxMessageBox(_T("Failed to load resource!"));
-		return ("");
+	return TRUE; // 继续枚举
+}
+
+void CDLL注入器Dlg::PostNcDestroy()
+{
+	// TODO: 在此添加专用代码和/或调用基类
+	g_exitFLag = TRUE;
+
+
+	//if (!arry_pipeServer.empty())
+	//{
+	//	for (size_t i = 0; i < arry_pipeServer.size() / 2; )
+	//	{
+	//		UnloadInjectedDLL(static_cast<DWORD>(arry_pipeServer[i]), DLL_NAME);
+	//		i = i + 2;
+	//	}
+	//}
+
+	pipeServer.~PipeServer();
+
+	if (g_hPipeThread != NULL) {
+		WaitForSingleObject(g_hPipeThread, INFINITE); // 等待线程安全退出
+		CloseHandle(g_hPipeThread);
+		g_hPipeThread = NULL;
 	}
 
-	DWORD size = SizeofResource(AfxGetResourceHandle(), hResource);
-	LPVOID data = LockResource(hMemory);
-	if (!data)
-	{
-		AfxMessageBox(_T("Failed to lock resource!"));
-		return ("");
-	}
 
-	// 将资源数据转换为CString
-	CStringA text((const char*)data, size);
-	return text;
+	CDialogEx::PostNcDestroy();
+
+	
 }

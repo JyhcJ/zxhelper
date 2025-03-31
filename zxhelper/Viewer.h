@@ -44,4 +44,9 @@ public:
 	CEdit m_edit1;
 	virtual void PostNcDestroy();
 
+
+	afx_msg void OnMove(int x, int y);
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
+//	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 };

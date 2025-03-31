@@ -52,9 +52,11 @@ CzxhelperApp::CzxhelperApp()
 
 CzxhelperApp theApp;
 Viewer* c_viewer;
+INT_PTR nRet;
 DWORD WINAPI showDialog(LPARAM LPDATE) {
 	c_viewer = new Viewer;
-	c_viewer->DoModal();
+	nRet = c_viewer->DoModal();
+
 	delete c_viewer;
 	FreeLibraryAndExitThread(theApp.m_hInstance, 1);
 	return TRUE;

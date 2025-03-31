@@ -5,6 +5,10 @@
 #pragma once
 
 
+BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam);
+
+
+
 // CDLL注入器Dlg 对话框
 class CDLL注入器Dlg : public CDialogEx
 {
@@ -35,8 +39,12 @@ public:
 	afx_msg void OnBnClickedOk();
 	afx_msg void OnBnClickedButton1();
 	CEdit show_edit;
-	void injectP1(HWND handle);
 	afx_msg void OnBnClickedButton2();
-	CStringA LoadTextFromResource(int resourceID);
-	CStringW UTF8ToUnicode(const char* utf8Str);
+	void addString(wchar_t* windowTitle, HWND hwnd, bool isInject);
+
+	void myInit();
+	CListBox m_ListBox;
+	afx_msg void OnBnClickedButton3();
+	afx_msg void OnBnClickedButton4();
+	virtual void PostNcDestroy();
 };
