@@ -17,22 +17,12 @@ std::vector<T人物属性> traversePerson();
 
 std::vector<T技能> traverseSkill();
 
-
-
 T人物属性 getPersonAtt();
 
 wchar_t* getName();
 
 QWORD getAtt_TBaseAddress();
 
-QWORD getAtt_qixue();
-
-QWORD getAtt_zhenqi();
-
-QWORD getAtt_yuanli();
-
-QWORD getAtt_wushi();
-
-QWORD getAtt_jianmian();
+void updateAddress();
 
 bool isString(QWORD* ptr, size_t maxLength);

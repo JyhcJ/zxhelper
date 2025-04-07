@@ -6,6 +6,7 @@
 #define IDC_BUTTON1                     1002
 #define IDC_BUTTON2                     1003
 #define IDD_DIALOG2                     1004
+#define IDC_BUTTON5                     1004
 #define IDR_TXT1                        1006
 #define IDC_STATIC2                     1010
 #define IDC_STATIC3                     1011

@@ -1,8 +1,16 @@
 #include "pch.h"
+
 #include "normalFun.h"
 #include "zxhelper.h"
-#include <vector>
 #include <functional>
+#include <immintrin.h>
+#include <vector>
+#include "counst.h"
+#include <cstring> // memcmp
+#include <iostream>
+#include <Psapi.h> // GetModuleInformation
+#include <vector>
+#include <Windows.h>
 //#include "afxdialogex.h"
 
 //安全返回参数地址的值
@@ -23,7 +31,7 @@ float SafeReadFloat(DWORD* ptr) {
 QWORD SafeReadQWORD_Arry_NotLast(std::vector<QWORD> arry) {
 	size_t i = arry.size();
 	QWORD temp = 0;
-	QWORD ret = 0 ;
+	QWORD ret = 0;
 	for (QWORD offset : arry)
 	{
 		i--;
@@ -79,7 +87,7 @@ void ReadUtf8FileAndSplitByNewline(CStringArray& lines)
 		if (filePath.IsEmpty())
 		{
 			AfxMessageBox(_T("未选择文件！"));
-			return ;
+			return;
 		}
 	}
 	else
@@ -92,7 +100,7 @@ void ReadUtf8FileAndSplitByNewline(CStringArray& lines)
 	if (!file.Open(filePath, CFile::modeRead | CFile::typeBinary))
 	{
 		AfxMessageBox(_T("无法打开文件！"));
-		return ;
+		return;
 	}
 
 	// 获取文件大小
@@ -101,7 +109,7 @@ void ReadUtf8FileAndSplitByNewline(CStringArray& lines)
 	{
 		AfxMessageBox(_T("文件为空！"));
 		file.Close();
-		return ;
+		return;
 	}
 
 	// 读取文件内容
@@ -126,7 +134,7 @@ void ReadUtf8FileAndSplitByNewline(CStringArray& lines)
 	if (length <= 0)
 	{
 		AfxMessageBox(_T("文件内容转换失败！"));
-		return ;
+		return;
 	}
 
 	CString contentW;
@@ -160,7 +168,7 @@ void ReadUtf8FileAndSplitByNewline(CStringArray& lines)
 		//AfxMessageBox(lines[i]); // 弹出消息框显示每一行
 		//Call_输出调试信息("调试信息:str = %s", lines[i]);
 	}
-	
+
 }
 // 比较函数，用于CString的qsort
 // 自定义比较函数
@@ -303,36 +311,36 @@ CStringW UTF8ToUnicode(const char* utf8Str)
 }
 
 // 不能用%P
-void PrintRegisters( CONTEXT* ctx) {
+void PrintRegisters(CONTEXT* ctx) {
 	Call_输出调试信息("异常发生时寄存器状态: RCX=0x%p , RDX=0x%p , R8=0x%p , R9=0x%p", ctx->Rcx, ctx->Rdx, ctx->R8, ctx->R9);
 	Call_输出调试信息("异常发生时寄存器状态: RDI=0x%p , RAX=0x%p , RBX=0x%p", ctx->Rdi, ctx->Rax, ctx->Rbx);
 	Call_输出调试信息("异常发生时寄存器状态: RSP=0x%p , RBP=0x%p", ctx->Rsp, ctx->Rbp);
 }
 
-
+// 如果调用了此方法还是异常崩溃,说明asm正确,异常发生在call中.
 void call_asm(std::function<void()>&& func) {
-    CONTEXT ctx;
+	CONTEXT ctx;
 
-    __try
-    {
-        // Move the function object to a local variable
+	__try
+	{
+		// Move the function object to a local variable
 
-        // Call the function
+		// Call the function
 		std::invoke(func);
-  
-        Call_输出调试信息("__try安全调用_call");
-    }
-    __except (
-        ctx = *(GetExceptionInformation())->ContextRecord,
-        PrintRegisters(&ctx),
-        EXCEPTION_EXECUTE_HANDLER
-        ) {
-        DWORD code;
-        code = GetExceptionCode();
-        Call_输出调试信息("异常代码: 0x%X", code);
-    
-        return;
-    }
+
+		Call_输出调试信息("__try安全调用_call");
+	}
+	__except (
+		ctx = *(GetExceptionInformation())->ContextRecord,
+		PrintRegisters(&ctx),
+		EXCEPTION_EXECUTE_HANDLER
+		) {
+		DWORD code;
+		code = GetExceptionCode();
+		Call_输出调试信息("异常代码: 0x%X", code);
+
+		return;
+	}
 }
 
 void seh_translator(unsigned int code, _EXCEPTION_POINTERS* ep) {
@@ -368,3 +376,182 @@ void safeCall(std::function<void(QWORD*)> fp, QWORD* params) {
 		PrintRegisters(e.getContext());
 	}*/
 }
+
+
+
+#pragma comment(lib, "Psapi.lib") // 链接 Psapi.lib
+
+// 将通配符 "?" 替换为 0x00（可匹配任意字节）
+//std::vector<BYTE> ParsePattern(const char* pattern) {
+//	std::vector<BYTE> bytes;
+//	for (const char* p = pattern; *p; ++p) {
+//		if (*p == '?') {
+//			bytes.push_back(0x00); // 通配符
+//			if (*(p + 1) == '?') ++p; // 跳过第二个 '?'
+//		}
+//		else if (isxdigit(*p)) {
+//			BYTE byte = strtoul(p, nullptr, 16);
+//			bytes.push_back(byte);
+//			++p; // 跳过第二个十六进制字符
+//		}
+//	}
+//	return bytes;
+//}
+
+
+std::vector<BYTE> ParsePattern(const char* patternStr) {
+	std::vector<BYTE> bytes;
+	while (*patternStr) {
+		if (*patternStr == ' ') {  // 跳过空格
+			++patternStr;
+			continue;
+		}
+
+		if (*patternStr == '?') {  // 处理通配符
+			++patternStr;
+			if (*patternStr == '?') ++patternStr;
+			bytes.push_back(0x00); // 通配符标记
+		}
+		else if (isxdigit(*patternStr)) {  // 处理十六进制字节
+			if (!isxdigit(patternStr[1])) break; // 确保有两个十六进制数字
+			char byteStr[3] = { patternStr[0], patternStr[1], '\0' };
+			BYTE byte = (BYTE)strtoul(byteStr, nullptr, 16);
+			bytes.push_back(byte);
+			patternStr += 2;
+		}
+		else {
+			break; // 遇到非法字符
+		}
+	}
+	return bytes;
+}
+// 使用 SIMD (SSE4.1) 加速模式匹配（比 memcmp 更快）
+bool MemoryMatchSSE(const BYTE* data, const BYTE* pattern, size_t patternSize) {
+	size_t i = 0;
+
+	// 处理16字节块
+	for (; i + 16 <= patternSize; i += 16) {
+		__m128i dataChunk = _mm_loadu_si128((__m128i*)(data + i));
+		__m128i patternChunk = _mm_loadu_si128((__m128i*)(pattern + i));
+
+		// 创建通配符掩码（模式中0x00表示通配符）
+		__m128i wildcardMask = _mm_cmpeq_epi8(patternChunk, _mm_setzero_si128());
+		__m128i comparison = _mm_cmpeq_epi8(dataChunk, patternChunk);
+
+		// 结合通配符掩码（匹配成功或通配符都接受）
+		__m128i result = _mm_or_si128(comparison, wildcardMask);
+
+		uint16_t maskBits = _mm_movemask_epi8(result);
+		if (maskBits != 0xFFFF) return false;
+	}
+
+	// 处理剩余字节
+	for (; i < patternSize; ++i) {
+		if (pattern[i] != 0x00 && data[i] != pattern[i]) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+// 在 elementclient64.exe 模块内搜索字节模式（直接指针访问 + SIMD 加速）
+uintptr_t FindPatternInElementClient(const char* patternStr, BYTE* scanStart) {
+	std::vector<BYTE> pattern = ParsePattern(patternStr);
+
+	// 获取 elementclient64.exe 模块基址和大小
+	HMODULE hModule = GetModuleHandleA(MOUDLE_ZX_NAME);
+	if (!hModule) {
+		std::cerr << "Failed to find elementclient64.exe module!" << std::endl;
+		return 0;
+	}
+
+	MODULEINFO modInfo;
+	if (!GetModuleInformation(GetCurrentProcess(), hModule, &modInfo, sizeof(modInfo))) {
+		std::cerr << "Failed to get module info!" << std::endl;
+		return 0;
+	}
+
+	// 直接访问模块内存
+	if (scanStart == nullptr)
+	{
+		scanStart = (BYTE*)hModule;
+	}
+
+	BYTE* scanEnd = scanStart + modInfo.SizeOfImage;
+
+	// 使用 SIMD 加速搜索
+	for (BYTE* p = scanStart; p < scanEnd - pattern.size(); ++p) {
+		if (MemoryMatchSSE(p, pattern.data(), pattern.size())) {
+			return (uintptr_t)p;
+		}
+	}
+
+	return 0; // 未找到
+}
+
+// 计算模式大小（包含通配符和十六进制字节）
+size_t GetPatternSize(const char* pattern) {
+	size_t count = 0;
+	while (*pattern) {
+		if (*pattern == ' ') {
+			pattern++;
+			continue;
+		}
+
+		if (*pattern == '?') {  // 处理通配符
+			count++;
+			pattern++;
+			if (*pattern == '?') pattern++;  // 处理双问号情况
+		}
+		else if (isxdigit(*pattern)) {  // 处理十六进制字节
+			count++;
+			pattern += 2;
+		}
+		else {
+			break;  // 非法字符
+		}
+	}
+	return count;
+}
+
+// 特征码格式:99 ?? ?? ?? ?? 33 通配符一定是?? 不能是99 ? ? ? ? 33 
+QWORD calAddress(char* featureCode, char* cruxCode, bool isAfter, int repeats,bool isOffset = false) {
+	// 示例：搜索 "66 89 03 44 88 73 ?? ?? 66 89 6B ?? ?? 89 73 ?? ?? ..."
+	//const char* featureCode = "66 89 03 44 88 73 ?? ?? 66 89 6B ?? ?? 89 73 ?? ?? 44 8D 40 ?? ?? 40 88 7B ?? ?? 48 8B 0D ?? ?? ?? ?? ?? ?? ?? ?? 48 8B 49 ?? ??";
+
+
+	// 在 elementclient64.exe 模块内搜索
+	uintptr_t foundAddr = FindPatternInElementClient(featureCode, nullptr);
+	//Call_输出调试信息("cruxCode: 0x%s", cruxCode);
+	//Call_输出调试信息("foundAddr: 0x%p", foundAddr);
+	if (!foundAddr) {
+		Call_输出调试信息("没有相匹配的特征码: %s", featureCode);
+		return 0;
+	}
+
+	//std::cout << "Pattern found at: 0x" << std::hex << foundAddr << std::endl;
+
+	uintptr_t cruxCodeAddr = FindPatternInElementClient(cruxCode, (BYTE*)foundAddr + GetPatternSize(featureCode));
+	//Call_输出调试信息("cruxCodeAddr: 0x%p", cruxCodeAddr);
+
+	uintptr_t nextAddr = cruxCodeAddr + GetPatternSize(cruxCode) + 0x4;
+
+
+	//Call_输出调试信息("nextAddr: 0x%p", nextAddr);
+	int32_t dexValue = SafeReadDWORD((DWORD*)(nextAddr - 0x4));
+
+	if (isOffset)
+	{
+		return dexValue;
+	}
+
+	QWORD baseAddress = nextAddr + dexValue;
+	//Call_输出调试信息("baseAddress: 0x%p", baseAddress);
+	//Call_输出调试信息("baseAddress: 0x%p", baseAddress);
+	// 直接读取目标地址的值
+	//uintptr_t value = (uintptr_t)(SafeReadQWORD((QWORD*)nextAddr));
+
+	return baseAddress;
+}
+

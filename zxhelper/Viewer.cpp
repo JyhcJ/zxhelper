@@ -69,6 +69,7 @@ BEGIN_MESSAGE_MAP(Viewer, CDialogEx)
 	ON_WM_MOVE()
 	ON_WM_TIMER()
 //	ON_WM_CREATE()
+ON_BN_CLICKED(IDC_BUTTON5, &Viewer::OnBnClickedButton5)
 END_MESSAGE_MAP()
 
 // C_viewer 消息处理程序
@@ -113,7 +114,12 @@ void Viewer::init() {
 
 }
 
-// 窗口初始化(已有窗口句柄) 并没有
+
+
+
+// 打坐按钮
+void Viewer::OnBnClickedButton1()
+{// 窗口初始化(已有窗口句柄) 并没有
 //int Viewer::OnCreate(LPCREATESTRUCT lpCreateStruct)
 //{
 //	if (CDialogEx::OnCreate(lpCreateStruct) == -1)
@@ -123,11 +129,9 @@ void Viewer::init() {
 //	pDlg = reinterpret_cast<Viewer*>(AfxGetMainWnd());
 //	return 0;
 //}
-// 打坐按钮
-void Viewer::OnBnClickedButton1()
-{
 	// TODO: 在此添加控件通知处理程序代码
 	relex();
+
 }
 
 //#pragma pack(push, 1)
@@ -247,6 +251,7 @@ DWORD WINAPI PipeThread(LPVOID lpParam) {
 void CloseLog() {
 	g_Log.Close();
 }
+
 void Viewer::thread_getAtt()
 {
 	// 使用 Lambda 表达式包装成员函数
@@ -612,4 +617,10 @@ BOOL Viewer::PreTranslateMessage(MSG* pMsg)
 
 	return CDialogEx::PreTranslateMessage(pMsg);
 
+}
+
+void Viewer::OnBnClickedButton5()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	updateAddress();
 }

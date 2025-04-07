@@ -4,23 +4,33 @@
 //const QWORD BASE_ADDRESS_ATT = 0x14171CFD8;
 //const QWORD BASE_ADDRESS_ATT = 14171DFD0;
 //const QWORD BASE_ADDRESS_ATT = 0x000000014171DFD0;
-const QWORD BASE_ADDRESS_ATT = 0x0000000141725098;
+//66 89 03 44 88 73 ?? 
+
+// 改为可修改的变量（非 const）
+QWORD& GetBaseAddress();
+
+//const QWORD BASE_ADDRESS_ATT = 0x0000000141725098;
 
 // 一级偏移 OFFSETS_BASE+558气血
 const std::vector<QWORD> OFFSETS_BASE = { 0x38,0x10,0x48,0x10,0x60 };
 
 // 使用物品RCX基址 rcx = [[14171CFD8]+40]+170
-const std::vector<QWORD> USEOBJ_RCX_OFFSETS = { BASE_ADDRESS_ATT ,0x40 ,0x170 };
+// 动态生成偏移量向量
+const std::vector<QWORD>& Get_USEOBJ_RCX_OFFSETS();
 
 //封包使用物品  rcx = [[[[[[0x14171CFD8]+40]+f0]+8]+8]+28]
 //const std::vector<QWORD> USEOBJ_ENCAP_RCX_OFFSETS = { BASE_ADDRESS_ATT ,0x40 ,0xF0,0x08,0x08,0x28 };
-const std::vector<QWORD> USEOBJ_ENCAP_RCX_OFFSETS = { BASE_ADDRESS_ATT ,0x40 };
+//const std::vector<QWORD> USEOBJ_ENCAP_RCX_OFFSETS = { BASE_ADDRESS_ATT ,0x40 };
+
+const std::vector<QWORD>& Get_USEOBJ_ENCAP_RCX_OFFSETS();
+
 //const QWORD BASE_ADDRESS_NAME = 0x7FFC440F4978;
 
 //周围人物对象基址
 // [[[[14171DFD0]+38]+10]+48]+30   是+30奥
-const std::vector<QWORD> PERSON_AROUD_OFFSETS = { BASE_ADDRESS_ATT ,0x38 ,0x10 ,0x48,0x30 };
+//const std::vector<QWORD> PERSON_AROUD_OFFSETS = { BASE_ADDRESS_ATT ,0x38 ,0x10 ,0x48,0x30 };
 
+const std::vector<QWORD>& Get_PERSON_AROUD_OFFSETS();
 //气血偏移
 const int  OFFSET_QIXUE = 0x558;
 struct T人物属性偏移
@@ -91,7 +101,7 @@ struct T包裹偏移
 	*< Offset>90或者80	  88< / Offset >
 	< Offset>18	C  20< / Offset >18数量	C:ID  20:能否使用?
 	< Offset>index * 8 < / Offset >index格子位置
-	< Offset>18/20 < / Offset > 18d包裹对象 20d包裹上限
+	< Offset>18/20 < / Offset > 18d包裹对象 20d包裹上限1
 	< Offset>34e0 < / Offset >二级偏移
 	< Offset>60 < / Offset > OFFSETS_BASE
 	< Offset>10 < / Offset >
@@ -105,7 +115,7 @@ struct T包裹偏移
 
 
 	//[[[[[[[0x14171CFD8]+38]+10]+48]+10]+60]+34e0]
-	const QWORD d二级偏移 = 0x34E0;
+	static QWORD d二级偏移;
 
 	const QWORD d包裹上限偏移 = 0x20;//0x24也是
 	const QWORD d包裹对象偏移 = 0x18;
@@ -134,11 +144,16 @@ struct T技能偏移 {
 	//  000000003BFFF468  66 00 //A7 78 F3 67 47 64 CE 98 //00 30 5E 00 66 00  f碧柳摇风　 ^ f
 	//  00000000A3C99928  66 00 //1E 82 34 78 CD 91 71 5C //00 30 5E 00 66 00  f舞破重山　 ^ f
 
+	//std::vector<QWORD> offsets_一级 = { BASE_ADDRESS_ATT, 0x38,0x60 };
+	const std::vector<QWORD>& Get_offsets_一级();
 
-	std::vector<QWORD> offsets_一级 = { BASE_ADDRESS_ATT, 0x38,0x60 };
 	std::vector<QWORD> offsets_技能名称 = { 0x38,0xC };
-	QWORD offset_技能遍历最大数量 = 0x3808;
-	QWORD offset_技能数组首地址 = 0x3800;
+
+	static QWORD offset_技能遍历最大数量;
+
+	// 特征码:C3 CC CC 48 89 5C 24 08 44 8B 99 ? ? ? ? ? ? ? ? 33 C0 44 8B D0 45 85 DB 7E
+	// 匹配值:24 48 8B 99
+	static QWORD offset_技能数组首地址;
 	QWORD offset_技能ID = 0x10;
 	QWORD offset_技能冷却时间 = offset_技能ID + 4;
 	QWORD offset_技能最大冷却时间 = offset_技能ID + 8;

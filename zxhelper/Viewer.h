@@ -49,4 +49,5 @@ public:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 //	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	afx_msg void OnBnClickedButton5();
 };

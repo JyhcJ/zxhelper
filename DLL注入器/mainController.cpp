@@ -4,6 +4,7 @@
 #include "mainController.h"
 #include <tlhelp32.h>
 #include <vector>
+#include "test.h"
 
 //注入DLL
 const char* DLL_PATH = "C:/Users/54469/Desktop/zxhelper/zxhelper/x64/Debug/zxhelper.dll";
@@ -85,6 +86,8 @@ bool cereatePipeAndGetProHandle(HWND hwnd) {
 		//MessageBoxW(L"打开 process 失败", NULL, MB_OK);
 		return false;
 	}
+
+
 	CString rString;
 
 	CDLL注入器Dlg* pDlg = reinterpret_cast<CDLL注入器Dlg*>(AfxGetMainWnd());

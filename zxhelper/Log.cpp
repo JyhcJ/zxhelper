@@ -48,6 +48,8 @@ void CLog::Write(LPCTSTR lpszFormat, ...) {
     CString strFinalLog = strTime + strLog + _T("\n");
     m_LogFile.WriteString(strFinalLog);
     m_LogFile.Flush(); // 立即写入文件
+
+
 }
 
 // 关闭日志文件

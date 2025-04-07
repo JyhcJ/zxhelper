@@ -1,9 +1,9 @@
 #pragma once
 #include <eh.h> // _set_se_translator
 #include <functional>
+#include <iostream>
 #include <vector>
 #include <Windows.h>
-#include <iostream>
 QWORD SafeReadQWORD(QWORD* ptr);
 
 float SafeReadFloat(float* ptr);
@@ -83,3 +83,6 @@ LONG __stdcall MyVectoredHandler(EXCEPTION_POINTERS* ExceptionInfo);
 
 void safeCall(std::function<void(QWORD*)> fp, QWORD* params);
 
+uintptr_t FindPatternInElementClient(const char* patternStr, BYTE* scanStart);
+
+QWORD calAddress(char* featureCode, char* cruxCode, bool isAfter, int repeats, bool isOffet);
