@@ -1,3 +1,1 @@
-PythonApplication1
-test
-把这两个文件删除
+只适合64位
