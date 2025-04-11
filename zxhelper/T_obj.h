@@ -38,7 +38,8 @@ struct T人物属性偏移
 	// 角色名称基地址
 	// const QWORD BASE_ADDRESS_NAME = 0x1417243B0;
 	// 角色名称 : [0x00000001417253C0]的值
-	const QWORD BASE_ADDRESS_NAME = 0x00000001417253C0;
+	//const QWORD BASE_ADDRESS_NAME = 0x00000001417253C0;
+	const QWORD BASE_ADDRESS_NAME = 0x7FF933EC4978;
 
 	const std::vector<QWORD> d一级偏移vector = OFFSETS_BASE;
 	QWORD d一级偏移r = 0;		//调用时赋值 ,其实就是d一级偏移vector的结果
@@ -48,8 +49,11 @@ struct T人物属性偏移
 	const static QWORD d最大血量偏移 = 0;
 	const static QWORD d真气偏移 = d血量偏移 + 0x8;
 	const static QWORD d元力偏移 = d血量偏移 + 0xC;
-	const static QWORD d无视偏移 = d血量偏移 + 0x450C;
-	const static QWORD d减免偏移 = d血量偏移 + 0x450C - 0x8;
+
+	// 这个也是打偏移 更新后可能会改变 可用动态地址.
+	//const static QWORD d无视偏移 = d血量偏移 + 0x450C;
+	const static QWORD d无视偏移 =  0x4A84 + 0x8;
+	const static QWORD d减免偏移 = d无视偏移 - 0x8;
 	const static DWORD fX偏移 = 0x48;
 	const static DWORD fY偏移 = fX偏移 + 0x8;
 	const static DWORD fZ偏移 = fX偏移 + 0x4;

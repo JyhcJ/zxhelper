@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zxhelper", "zxhelper.vcxpro
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DLL注入器", "..\DLL注入器\DLL注入器.vcxproj", "{8F49547E-88A8-FC65-27E3-7CB63ABE1BF0}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RPC_T", "..\RPC_T\RPC_T.vcxproj", "{B782F173-4507-49DF-99B4-BA0F81144303}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -31,6 +33,14 @@ Global
 		{8F49547E-88A8-FC65-27E3-7CB63ABE1BF0}.Release|x64.Build.0 = Release|x64
 		{8F49547E-88A8-FC65-27E3-7CB63ABE1BF0}.Release|x86.ActiveCfg = Release|Win32
 		{8F49547E-88A8-FC65-27E3-7CB63ABE1BF0}.Release|x86.Build.0 = Release|Win32
+		{B782F173-4507-49DF-99B4-BA0F81144303}.Debug|x64.ActiveCfg = Debug|x64
+		{B782F173-4507-49DF-99B4-BA0F81144303}.Debug|x64.Build.0 = Debug|x64
+		{B782F173-4507-49DF-99B4-BA0F81144303}.Debug|x86.ActiveCfg = Debug|Win32
+		{B782F173-4507-49DF-99B4-BA0F81144303}.Debug|x86.Build.0 = Debug|Win32
+		{B782F173-4507-49DF-99B4-BA0F81144303}.Release|x64.ActiveCfg = Release|x64
+		{B782F173-4507-49DF-99B4-BA0F81144303}.Release|x64.Build.0 = Release|x64
+		{B782F173-4507-49DF-99B4-BA0F81144303}.Release|x86.ActiveCfg = Release|Win32
+		{B782F173-4507-49DF-99B4-BA0F81144303}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

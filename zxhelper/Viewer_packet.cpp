@@ -42,6 +42,7 @@ BEGIN_MESSAGE_MAP(Viewer_packet, CDialogEx)
 	ON_NOTIFY(NM_RDBLCLK, IDC_LIST5, &Viewer_packet::OnRdblclkList5)
 	ON_NOTIFY(LVN_COLUMNCLICK, IDC_LIST5, &Viewer_packet::OnColumnclickList5)
 	ON_BN_CLICKED(IDC_BUTTON4, &Viewer_packet::OnBnClickedButton4)
+	ON_BN_CLICKED(IDC_BUTTON6, &Viewer_packet::OnBnClickedButton6)
 END_MESSAGE_MAP()
 
 
@@ -148,6 +149,10 @@ void Viewer_packet::initPerson() {
 	showPerson();
 }
 
+struct PersonData {
+	DWORD* p坐标ptr;  // 假设是坐标指针
+	DWORD dID;      // 假设是ID
+};
 void Viewer_packet::showPerson() {
 	std::vector<T人物属性> persons = traversePerson();
 	m_CListCtrl.DeleteAllItems();
@@ -168,9 +173,19 @@ void Viewer_packet::showPerson() {
 		m_CListCtrl.SetItemText(nIndex, 2, str); // 设置第3列
 
 		str.Format(_T("%08X"), person.dID);
-		m_CListCtrl.SetItemText(nIndex, 3, str); // 设置第4列
 
-		m_CListCtrl.SetItemData(nIndex, (DWORD_PTR)person.p坐标ptr);
+		m_CListCtrl.SetItemText(nIndex, 3, str); // 设置第4列
+		// 定义结构体
+		
+
+		// 存储数据
+		PersonData* pData = new PersonData{ person.p坐标ptr, person.dID };
+		m_CListCtrl.SetItemData(nIndex, reinterpret_cast<DWORD_PTR>(pData));
+
+	/*	DWORD_PTR data[] = { (DWORD_PTR)person.p坐标ptr ,person.dID };
+		m_CListCtrl.SetItemData(nIndex, reinterpret_cast<DWORD_PTR>(data));*/
+
+
 
 		//m_CListCtrl.UpdateData();
 	}
@@ -403,19 +418,41 @@ int CALLBACK Viewer_packet::CompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM l
 
 
 }
-
+// 脚底瞬移
 void Viewer_packet::OnBnClickedButton4()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	int nSelectedIndex = m_CListCtrl.GetSelectionMark();
 	if (nSelectedIndex != -1) {
-		CString strItemText = m_CListCtrl.GetItemText(nSelectedIndex, 0);  // 获取选中项的文本
-		DWORD_PTR ptr = m_CListCtrl.GetItemData(nSelectedIndex);
-		Call_输出调试信息("脚底瞬移对象坐标指针:%p", ptr);
-		teleportation(static_cast<DWORD>(ptr));
+		//CString strItemText = m_CListCtrl.GetItemText(nSelectedIndex, 0);  // 获取选中项的文本
+
+		// 读取数据
+		PersonData* pRetrieved = reinterpret_cast<PersonData*>(m_CListCtrl.GetItemData(nSelectedIndex));
+		//TRACE("ID: %d, 坐标指针: %p\n", pRetrieved->dID, pRetrieved->p坐标ptr);
+
+		//DWORD_PTR ptr = m_CListCtrl.GetItemData(nSelectedIndex);
+		Call_输出调试信息("脚底瞬移对象坐标指针:%p", pRetrieved->p坐标ptr);
+		teleportation((DWORD)(pRetrieved->p坐标ptr));
 	}
 	else {
 		AfxMessageBox(_T("没有选中人物对象"));
 	}
 
+}
+// 一键跟随目标
+void Viewer_packet::OnBnClickedButton6()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	int nSelectedIndex = m_CListCtrl.GetSelectionMark();
+	if (nSelectedIndex != -1) {
+		//CString strItemText = m_CListCtrl.GetItemText(nSelectedIndex, 0);  // 获取选中项的文本
+		PersonData* pRetrieved = reinterpret_cast<PersonData*>(m_CListCtrl.GetItemData(nSelectedIndex));
+
+		//DWORD_PTR ptr = m_CListCtrl.GetItemData(nSelectedIndex);
+		Call_输出调试信息("一键跟随目标ID:%p", pRetrieved->dID);
+		follow(pRetrieved->dID);
+	}
+	else {
+		AfxMessageBox(_T("没有选中人物对象"));
+	}
 }

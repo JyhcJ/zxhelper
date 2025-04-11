@@ -243,7 +243,7 @@ void Call_输出调试信息W(const wchar_t* pszFormat, ...)
 }
 // 定义一个函数来计算三维空间中两点之间的距离
 float calculateDistance(DWORD* myptr, DWORD* objptr) {
-	Call_输出调试信息("1:%p ,,,2:%p ", myptr, objptr);
+	Call_输出调试信息("我的坐标信息: %p , , , 目标坐标 : %p ", myptr, objptr);
 	// 计算坐标差值
 	float dx = SafeReadFloat(myptr++) - SafeReadFloat(objptr++);
 	float dz = SafeReadFloat(myptr++) - SafeReadFloat(objptr++);
@@ -516,7 +516,7 @@ size_t GetPatternSize(const char* pattern) {
 }
 
 // 特征码格式:99 ?? ?? ?? ?? 33 通配符一定是?? 不能是99 ? ? ? ? 33 
-QWORD calAddress(char* featureCode, char* cruxCode, bool isAfter, int repeats,bool isOffset = false) {
+QWORD calAddress(char* featureCode, char* cruxCode, bool isAfter, int repeats, bool isOffset = false) {
 	// 示例：搜索 "66 89 03 44 88 73 ?? ?? 66 89 6B ?? ?? 89 73 ?? ?? ..."
 	//const char* featureCode = "66 89 03 44 88 73 ?? ?? 66 89 6B ?? ?? 89 73 ?? ?? 44 8D 40 ?? ?? 40 88 7B ?? ?? 48 8B 0D ?? ?? ?? ?? ?? ?? ?? ?? 48 8B 49 ?? ??";
 
@@ -531,8 +531,15 @@ QWORD calAddress(char* featureCode, char* cruxCode, bool isAfter, int repeats,bo
 	}
 
 	//std::cout << "Pattern found at: 0x" << std::hex << foundAddr << std::endl;
+	uintptr_t cruxCodeAddr;
+	for (size_t i = 0; i < repeats + 1; i++)
+	{
+		cruxCodeAddr = FindPatternInElementClient(cruxCode, (BYTE*)foundAddr + GetPatternSize(featureCode));
+		foundAddr = cruxCodeAddr;
+		// 占一位就行
+		featureCode = "11";
+	}
 
-	uintptr_t cruxCodeAddr = FindPatternInElementClient(cruxCode, (BYTE*)foundAddr + GetPatternSize(featureCode));
 	//Call_输出调试信息("cruxCodeAddr: 0x%p", cruxCodeAddr);
 
 	uintptr_t nextAddr = cruxCodeAddr + GetPatternSize(cruxCode) + 0x4;

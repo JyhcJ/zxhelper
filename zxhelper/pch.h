@@ -11,4 +11,5 @@
 #include "framework.h"
 
 #endif //PCH_H
+//	控制所有线程退出
 static bool g_exitFLag = false;

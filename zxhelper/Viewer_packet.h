@@ -48,7 +48,7 @@ public:
 	afx_msg void OnCbnSelchangeCombo1();
 	afx_msg void OnBnClickedButton1();
 	CListCtrl m_CListCtrl;
-
+	
 	afx_msg void OnRdblclkList5(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnColumnclickList5(NMHDR* pNMHDR, LRESULT* pResult);
 	void SortListCtrl(int nColumn, bool bAscending);
@@ -57,4 +57,5 @@ public:
 	bool m_bAscending;     // 排序顺序（升序或降序）
 	afx_msg void OnBnClickedButton4();
 	CListCtrl m_CListCtrlSkill;
+	afx_msg void OnBnClickedButton6();
 };

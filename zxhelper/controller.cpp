@@ -17,6 +17,8 @@ extern "C" void call_Select(QWORD rcx, QWORD rdx, QWORD callAddress);
 
 extern "C" void call_teleportation(QWORD rcx, QWORD rdx, QWORD r8, QWORD r9, QWORD obj_loc_ptr, QWORD rsp28, QWORD callAddress);
 
+extern "C" void call_follow(QWORD rcx, QWORD rdx, QWORD r8,QWORD r9, QWORD objID, QWORD callAddress);
+
 extern CLog g_Log;
 
 std::vector<T包裹物品属性> OBJS_ATT;
@@ -113,7 +115,7 @@ void selectObj(DWORD id) {
 	//QWORD callAddress = 0x1409AB4F0;
 	//QWORD callAddress = 0x00000001409AFC10;
 
-	Call_输出调试信息("参数1:%p,参数2:%p,参数3:%p", GetBaseAddress(), id, callAddress_selectObj);
+	Call_输出调试信息("基址:%p,选中人物ID:%p,call地址:%p", GetBaseAddress(), id, callAddress_selectObj);
 	//call_Select(BASE_ADDRESS_ATT, id, callAddress);
 	call_asm([=]()->void
 		{
@@ -143,6 +145,29 @@ void teleportation(DWORD obj_location_ptr) {
 		});
 
 
+}
+
+// 一键跟随目标(上一层函数是万能call 可以实现界面的所有操作)
+void follow(QWORD objID) {
+
+	//48 8B CF 48 63 D8 E8 ?? ?? ?? ?? 48 8B C8 41 B0 01 8B D3 E8 ?? ?? ?? ?? 48 8B CF 
+
+	char* featureCode = "48 8B CF 48 63 D8 E8 ?? ?? ?? ?? 48 8B C8 41 B0 01 8B D3 E8 ?? ?? ?? ?? 48 8B CF";
+	char* cruxCode = "E8";
+
+	QWORD rdx = 0xEE;
+	QWORD r8 = 0x0;
+	QWORD r9 = 0x0;
+	//Call_输出调试信息("0x%p;;;call_跟随rcx", calAddress(featureCode, cruxCode, true, 0, false));
+	//Call_输出调试信息("0x%p;;;call_跟随call", calAddress(featureCode, cruxCode, true, 1, false));
+	call_follow(
+		calAddress(featureCode, cruxCode, true, 0, false),
+		rdx,
+		r8,
+		r9,
+		objID,
+		calAddress(featureCode, cruxCode, true, 1, false)
+	);
 }
 
 // 喊话
@@ -273,7 +298,7 @@ std::vector<T人物属性> traversePerson() {
 			continue;
 		}
 		else {
-			Call_输出调试信息("调试信息:obj = %p", obj);
+			Call_输出调试信息("调试信息:选中对象地址 = %p", obj);
 			obj_att.dID = SafeReadDWORD((DWORD*)(obj + obj_att.offset.dID偏移));
 			selectObj(obj_att.dID);
 			DWORD temp = SafeReadDWORD((DWORD*)(obj + 8));
@@ -409,19 +434,26 @@ std::vector<T技能> traverseSkill() {
 // 获取自身人物属性
 T人物属性  getPersonAtt() {
 	QWORD userName = SafeReadQWORD((QWORD*)tPersonOffset.BASE_ADDRESS_NAME);
-	if (userName > 0XFFFFFFFFFFFF) {
-		tperson.有效性 = false;
-		return T人物属性();
-	}
+
 
 	if (isString((QWORD*)userName, 20)) {
 		tperson.p名称 = (wchar_t*)userName;
 	}
 	else {
-		tperson.p名称 = L"error";
+		if (isString((QWORD*)tPersonOffset.BASE_ADDRESS_NAME, 20)) {
+			tperson.p名称 = (wchar_t*)tPersonOffset.BASE_ADDRESS_NAME;
+		}
+		else {
+			tperson.p名称 = L"error";
+		}
 	}
 
 	QWORD tfirst = SafeReadQWORD((QWORD*)(GetBaseAddress()));
+	if (tfirst > 0XFFFFFFFFFFFF) {
+		tperson.有效性 = false;
+		return T人物属性();
+	}
+
 	for (QWORD offset : tPersonOffset.d一级偏移vector)
 	{
 		tfirst = SafeReadQWORD((QWORD*)(tfirst + offset));
@@ -429,12 +461,13 @@ T人物属性  getPersonAtt() {
 	}
 
 
+	//实时更新,不要加载缓存变量了
+	//if (tPersonOffset.d一级偏移r == 0) {
+	//	tPersonOffset.d一级偏移r = tfirst;
+	//	tperson.p坐标ptr = (DWORD*)(tfirst + tPersonOffset.fX偏移);
+	//}
 
-	if (tPersonOffset.d一级偏移r == 0) {
-		tPersonOffset.d一级偏移r = tfirst;
-		tperson.p坐标ptr = (DWORD*)(tfirst + tPersonOffset.fX偏移);
-	}
-
+	tperson.p坐标ptr = (DWORD*)(tfirst + tPersonOffset.fX偏移);
 	tperson.d血量 = SafeReadDWORD((DWORD*)(tfirst + tPersonOffset.d血量偏移));
 	tperson.d真气 = SafeReadDWORD((DWORD*)(tfirst + tPersonOffset.d真气偏移));
 	tperson.d元力 = SafeReadDWORD((DWORD*)(tfirst + tPersonOffset.d元力偏移));
@@ -444,7 +477,6 @@ T人物属性  getPersonAtt() {
 
 	return tperson;
 }
-
 // 更新基址
 void updateBaseAddress() {
 	//featureCode = 66 89 03 44 88 73 ? ? 66 89 6B ? ? 89 73 ? ? 44 8D 40 ? ? 40 88 7B ? ? 48 8B 0D ? ? ? ? ? ? ? ? 48 8B 49 ? ?
@@ -468,7 +500,6 @@ void updateBaseAddress() {
 
 	//g_Log.Write(_T("基址:0x%p"), newAddress);
 }
-
 // 更新call地址
 void updateCallAddress() {
 	QWORD newAddress;

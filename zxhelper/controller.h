@@ -9,6 +9,8 @@ void selectObj(DWORD id);
 
 void teleportation(DWORD obj_location_ptr);
 
+void follow(QWORD objID);
+
 void hanHua(CString ptr);
 
 std::vector<T包裹物品属性> traversePackage();

@@ -592,7 +592,7 @@ void Viewer::PostNcDestroy()
 }
 
 
-
+// 注入器消息传递操作
 BOOL Viewer::PreTranslateMessage(MSG* pMsg)
 {
 	// TODO: 在此添加专用代码和/或调用基类
@@ -619,6 +619,7 @@ BOOL Viewer::PreTranslateMessage(MSG* pMsg)
 
 }
 
+// 更新地址和偏移 游戏更新要先使用
 void Viewer::OnBnClickedButton5()
 {
 	// TODO: 在此添加控件通知处理程序代码

@@ -168,4 +168,48 @@ call_teleportation proc
     add rsp,100h
     ret
 call_teleportation endp
+
+
+
+call_follow proc
+    
+    ;sub rsp,180h
+    ;;mov rcx,0000000004FBFFD0h ;//界面对象  界面对象 + 170 = 选中对象ID
+    ;mov rbx,rcx
+    ;mov r8 ,rcx
+    ;;mov [rcx+170h],0354A0D0h  ;//选中对象ID
+    ;;mov rdx,0000000141227BA8h ;//指令Follow 0000000141227BA8  46 6F 6C 6C 6F 77 00 00 42 69 6E 64 00 00 00 00  Follow..Bind....  
+    ;
+    ;mov rdi,rdx
+    ;mov r9,0000000140C420B0h ;//call地址
+    ;call r9
+    ;add rsp,180h
+    ;ret
+        
+
+    ;48 8B CF 48 63 D8 E8 ?? ?? ?? ?? 48 8B C8 41 B0 01 8B D3 E8 ?? ?? ?? ?? 48 8B CF 
+    sub rsp,40h
+    call rcx
+    mov rcx,rax
+    ;mov rcx,0x0000000021600140
+    xor r9d,r9d
+    xor eax,eax
+    xor r8d,r8d
+    mov rdx,00000000000000EEh
+
+    ;mov r8,0x0000000000000000
+    ;mov r9,0x0000000000000000
+ 
+    ;mov r15,00000001402D4830h
+    ;mov [rsp+20],0x000000000382BAA0
+    mov r15,[rsp+28h+40h]
+    mov [rsp+20h],r15
+
+    mov r15,[rsp+30h+40h]
+    call r15
+    add rsp,40h
+    ret
+
+
+call_follow endp
 end
