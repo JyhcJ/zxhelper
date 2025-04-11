@@ -8,9 +8,11 @@
 
 
 
-![游戏更新后](https://github.com/user-attachments/assets/5400c649-3e1e-462b-97d8-c60e965ee5f9)
+
 
 游戏更新后基址和大偏移可能会变,自动根据特征码重新定位
+
+![游戏更新后](https://github.com/user-attachments/assets/5400c649-3e1e-462b-97d8-c60e965ee5f9)
 
 ![更新基址调试输出](https://github.com/user-attachments/assets/badff842-f23e-4656-a2ed-eddc02628590)
 
