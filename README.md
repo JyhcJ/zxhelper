@@ -1,6 +1,7 @@
 只适合64位
 
 注入器,架构测试可以先注入记事本测试. 注入已注入的目标会向目标执行自我销毁消息.
+
 ![注入器](https://github.com/user-attachments/assets/1fe3254a-13c8-49c2-88e9-dc8abf9d9758)
 
 
