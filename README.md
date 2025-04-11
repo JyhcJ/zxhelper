@@ -1,10 +1,13 @@
 只适合64位
 
+注入器,架构测试可以先注入记事本测试. 注入已注入的目标会向目标执行自我销毁消息.
+![注入器](https://github.com/user-attachments/assets/1fe3254a-13c8-49c2-88e9-dc8abf9d9758)
+
+
 
 跟随功能的上一层函数是一个根据鼠标映射对象的函数,参数根据 字符串+功能地址 的形式可以找到所有的UI操作功能.
 
 ![万能call](https://github.com/user-attachments/assets/87f44ea8-14f0-4a42-a276-c4d5d3d850cb)
-
 
 
 
